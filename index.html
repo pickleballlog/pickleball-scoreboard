@@ -1388,10 +1388,10 @@
       if (!payload || payload.roomId !== roomId) return;
       isApplyingRemoteState = true;
       try {
-        state = payload.state;
-        teamMatches = payload.teamMatches;
-        activeMatchIndex = payload.activeMatchIndex;
-        faultHistory = Array.isArray(payload.faultHistory) ? payload.faultHistory : [];
+        if (payload.state) state = payload.state;
+        if (Array.isArray(payload.teamMatches)) teamMatches = payload.teamMatches;
+        if (typeof payload.activeMatchIndex === 'number') activeMatchIndex = payload.activeMatchIndex;
+        faultHistory = Array.isArray(payload.faultHistory) ? [...payload.faultHistory] : [];
         if (typeof payload.teamNameA === 'string') {
           document.getElementById('team-name-A').value = payload.teamNameA;
         }
@@ -1441,7 +1441,7 @@
           if (!data || data.roomId !== roomId) return;
           if (data.type === 'request_state' && viewMode === 'control') {
             broadcastSnapshot();
-          } else if (viewMode === 'display') {
+          } else if (viewMode === 'display' && data.type === 'score_update') {
             applyRemoteSnapshot(data);
           }
         };
@@ -1462,7 +1462,7 @@
 
       const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
       realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
-        config: { broadcast: { self: false } }
+        config: { broadcast: { self: false, ack: true } }
       });
 
       realtimeChannel
@@ -1481,6 +1481,7 @@
               broadcastSnapshot();
             } else if (viewMode === 'display') {
               requestLatestState();
+              setTimeout(() => requestLatestState(), 400);
             }
           } else {
             setSyncIndicator(false, status);
