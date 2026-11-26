@@ -389,6 +389,19 @@
     .pickleball-app-wrapper .score-log-entry {
       margin-bottom: 2px;
     }
+    .pickleball-app-wrapper .game-log-details {
+      margin-top: 4px;
+      padding-left: 8px;
+      font-size: 0.75rem;
+      color: #bbb;
+      border-left: 2px solid #444;
+    }
+    .pickleball-app-wrapper .game-log-section-title {
+      font-weight: 700;
+      color: #9e9e9e;
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
     .pickleball-app-wrapper .game-target-row {
       width: 100%;
       margin-top: 6px;
@@ -634,7 +647,7 @@
       <!-- Team Match Summary Log -->
       <div class="hud match-summary-log-container" style="margin-top: 12px; text-align: left;">
         <div style="font-weight: bold; color: var(--accent-gold); font-size: 0.9rem; margin-bottom: 6px; text-transform: uppercase;">Team Match Summary Log</div>
-        <div id="match-summary-log" style="font-size: 0.8rem; color: #ddd; display: flex; flex-direction: column; gap: 4px;"></div>
+        <div id="match-summary-log" style="font-size: 0.8rem; color: #ddd; display: flex; flex-direction: column; gap: 6px;"></div>
       </div>
     </div>
   </div>
@@ -659,10 +672,10 @@
     let scoreHistory = [];
 
     let teamMatches = [
-      { name: "男雙 VS 女雙", teamAPlayers: ['M1', 'M2'], teamBPlayers: ['W1', 'W2'], scoreA: 0, scoreB: 0, completed: false, winner: null },
-      { name: "男雙 VS 混雙", teamAPlayers: ['M1', 'M2'], teamBPlayers: ['M3', 'W3'], scoreA: 0, scoreB: 0, completed: false, winner: null },
-      { name: "混雙 VS 女雙", teamAPlayers: ['M1', 'W1'], teamBPlayers: ['W2', 'W3'], scoreA: 0, scoreB: 0, completed: false, winner: null },
-      { name: "同屬性對戰", teamAPlayers: ['A1', 'A2'], teamBPlayers: ['B1', 'B2'], scoreA: 0, scoreB: 0, completed: false, winner: null }
+      { name: "男雙 VS 女雙", teamAPlayers: ['M1', 'M2'], teamBPlayers: ['W1', 'W2'], scoreA: 0, scoreB: 0, completed: false, winner: null, faultHistory: [], scoreHistory: [] },
+      { name: "男雙 VS 混雙", teamAPlayers: ['M1', 'M2'], teamBPlayers: ['M3', 'W3'], scoreA: 0, scoreB: 0, completed: false, winner: null, faultHistory: [], scoreHistory: [] },
+      { name: "混雙 VS 女雙", teamAPlayers: ['M1', 'W1'], teamBPlayers: ['W2', 'W3'], scoreA: 0, scoreB: 0, completed: false, winner: null, faultHistory: [], scoreHistory: [] },
+      { name: "同屬性對戰", teamAPlayers: ['A1', 'A2'], teamBPlayers: ['B1', 'B2'], scoreA: 0, scoreB: 0, completed: false, winner: null, faultHistory: [], scoreHistory: [] }
     ];
 
     let activeMatchIndex = 0;
@@ -687,6 +700,35 @@
       manualSwap: false,
       switchBadgeDismissed: false
     };
+
+    function ensureMatchLogs(match) {
+      if (!match) return;
+      if (!Array.isArray(match.faultHistory)) match.faultHistory = [];
+      if (!Array.isArray(match.scoreHistory)) match.scoreHistory = [];
+    }
+
+    function syncActiveMatchLogs() {
+      const m = teamMatches[activeMatchIndex];
+      if (!m) return;
+      ensureMatchLogs(m);
+      m.faultHistory = [...faultHistory];
+      m.scoreHistory = [...scoreHistory];
+    }
+
+    function getGameLogs(gameIndex) {
+      const match = teamMatches[gameIndex];
+      if (!match) return null;
+      ensureMatchLogs(match);
+      const isCurrent = gameIndex === activeMatchIndex;
+      return {
+        gameNumber: gameIndex + 1,
+        name: match.name,
+        score: `${match.scoreA}-${match.scoreB}`,
+        completed: match.completed,
+        scoreHistory: isCurrent ? [...scoreHistory] : [...match.scoreHistory],
+        faultHistory: isCurrent ? [...faultHistory] : [...match.faultHistory]
+      };
+    }
 
     function clone() {
       return JSON.parse(JSON.stringify(state));
@@ -948,6 +990,7 @@
       const teamLabel = team === 'A' ? nameA : nameB;
       const entry = `${teamLabel} +1 (${reason}) -> ${state.scoreA}-${state.scoreB}`;
       scoreHistory.push(entry);
+      syncActiveMatchLogs();
       renderScoreLog();
     }
 
@@ -1071,19 +1114,40 @@
       const nameA = document.getElementById('team-name-A').value;
       const nameB = document.getElementById('team-name-B').value;
       teamMatches.forEach((match, idx) => {
+        ensureMatchLogs(match);
         if (match.completed) {
           if (match.winner === 'A') totalWinsA++;
           if (match.winner === 'B') totalWinsB++;
         }
+        const gameScores = idx === activeMatchIndex ? scoreHistory : match.scoreHistory;
+        const gameFaults = idx === activeMatchIndex ? faultHistory : match.faultHistory;
+
         const div = document.createElement('div');
-        div.style.padding = '4px 6px';
+        div.style.padding = '6px 8px';
         div.style.borderRadius = '4px';
-        div.style.background = idx === activeMatchIndex ? '#2d2d2d' : 'transparent';
-        div.style.borderLeft = idx === activeMatchIndex ? '3px solid var(--accent-gold)' : 'none';
+        div.style.background = idx === activeMatchIndex ? '#2d2d2d' : '#222';
+        div.style.borderLeft = idx === activeMatchIndex ? '3px solid var(--accent-gold)' : '3px solid #444';
+
         const statusStr = match.completed
           ? `<b style="color: ${match.winner === 'A' ? 'var(--team-a-score)' : 'var(--team-b-score)'}">${match.winner === 'A' ? nameA : nameB} Won (${match.scoreA}-${match.scoreB})</b>`
-          : (idx === activeMatchIndex ? `<span style="color:var(--accent-gold)">In Progress (${state.scoreA}-${state.scoreB}, Server ${state.serverNumber})</span>` : `<span>Pending</span>`);
-        div.innerHTML = `<div><b>Game ${idx + 1} [${match.name}]:</b> ${statusStr}</div>`;
+          : (idx === activeMatchIndex ? `<span style="color:var(--accent-gold)">In Progress (${state.scoreA}-${state.scoreB}, Server ${state.serverNumber})</span>` : `<span>Pending (${match.scoreA}-${match.scoreB})</span>`);
+
+        let detailsHtml = `<div class="game-log-details">`;
+        detailsHtml += `<div class="game-log-section-title">Scores (${gameScores.length}):</div>`;
+        if (gameScores.length) {
+          detailsHtml += gameScores.map(item => `<div>• ${item}</div>`).join('');
+        } else {
+          detailsHtml += `<div>No score entries</div>`;
+        }
+        detailsHtml += `<div class="game-log-section-title">Faults (${gameFaults.length}):</div>`;
+        if (gameFaults.length) {
+          detailsHtml += gameFaults.map(item => `<div>• ${item}</div>`).join('');
+        } else {
+          detailsHtml += `<div>No fault entries</div>`;
+        }
+        detailsHtml += `</div>`;
+
+        div.innerHTML = `<div><b>Game ${idx + 1} [${match.name}]:</b> ${statusStr}</div>${detailsHtml}`;
         logEl.appendChild(div);
       });
       document.getElementById('event-score-A').textContent = totalWinsA;
@@ -1091,6 +1155,7 @@
     }
 
     function render() {
+      syncActiveMatchLogs();
       writePositionsToInputs();
       updateServerBanner();
       highlightServer();
@@ -1272,15 +1337,26 @@
         : 'RECEIVER';
       const entry = `${teamLabel} (${playerLabel}) - ${type} at ${state.scoreA}-${state.scoreB}`;
       faultHistory.push(entry);
+      syncActiveMatchLogs();
       renderFaultLog();
     }
 
     function loadMatch(index) {
+      const prevMatch = teamMatches[activeMatchIndex];
+      if (prevMatch) {
+        ensureMatchLogs(prevMatch);
+        prevMatch.faultHistory = [...faultHistory];
+        prevMatch.scoreHistory = [...scoreHistory];
+      }
+
       activeMatchIndex = index;
       const match = teamMatches[index];
+      ensureMatchLogs(match);
+
       history = [];
-      faultHistory = [];
-      scoreHistory = [];
+      faultHistory = [...match.faultHistory];
+      scoreHistory = [...match.scoreHistory];
+
       state.positions.A_left = match.teamAPlayers[0];
       state.positions.A_right = match.teamAPlayers[1];
       state.positions.B_right = match.teamBPlayers[0];
@@ -1310,6 +1386,10 @@
       currentMatch.scoreB = 0;
       currentMatch.completed = false;
       currentMatch.winner = null;
+      currentMatch.faultHistory = [];
+      currentMatch.scoreHistory = [];
+      faultHistory = [];
+      scoreHistory = [];
       loadMatch(activeMatchIndex);
     }
 
@@ -1328,6 +1408,7 @@
         currentMatch.completed = false;
         currentMatch.winner = null;
       }
+      syncActiveMatchLogs();
       render();
     }
 
@@ -1405,11 +1486,12 @@
     }
 
     function buildSnapshot() {
+      syncActiveMatchLogs();
       return {
         type: 'score_update',
         roomId,
         state: clone(),
-        teamMatches,
+        teamMatches: JSON.parse(JSON.stringify(teamMatches)),
         activeMatchIndex,
         faultHistory,
         scoreHistory,
@@ -1423,10 +1505,20 @@
       isApplyingRemoteState = true;
       try {
         if (payload.state) state = payload.state;
-        if (Array.isArray(payload.teamMatches)) teamMatches = payload.teamMatches;
+        if (Array.isArray(payload.teamMatches)) {
+          teamMatches = payload.teamMatches.map(m => {
+            ensureMatchLogs(m);
+            return m;
+          });
+        }
         if (typeof payload.activeMatchIndex === 'number') activeMatchIndex = payload.activeMatchIndex;
-        faultHistory = Array.isArray(payload.faultHistory) ? [...payload.faultHistory] : [];
-        scoreHistory = Array.isArray(payload.scoreHistory) ? [...payload.scoreHistory] : [];
+        const activeMatch = teamMatches[activeMatchIndex];
+        faultHistory = Array.isArray(payload.faultHistory)
+          ? [...payload.faultHistory]
+          : (activeMatch ? [...activeMatch.faultHistory] : []);
+        scoreHistory = Array.isArray(payload.scoreHistory)
+          ? [...payload.scoreHistory]
+          : (activeMatch ? [...activeMatch.scoreHistory] : []);
         if (typeof payload.teamNameA === 'string') {
           document.getElementById('team-name-A').value = payload.teamNameA;
         }
