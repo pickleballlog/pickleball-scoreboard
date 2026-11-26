@@ -323,6 +323,7 @@
     .pickleball-app-wrapper .server-indicator {
       color: var(--accent-gold);
       font-size: 0.65rem;
+      font-weight: 700;
       display: block;
       margin-top: 2px;
       text-transform: uppercase;
@@ -397,6 +398,7 @@
       margin-bottom: 2px;
     }
     .pickleball-app-wrapper .game-target-row {
+      width: 100%;
       margin-top: 6px;
       display: flex;
       justify-content: center;
@@ -413,7 +415,7 @@
       font-size: 0.8rem;
     }
 
-    /* Display Mode: Keep Event + Scoring + Server + Testing Sync Dot */
+    /* Display Mode: Keep Event + Scoring + Court Diagram + Server Indicator + Testing Sync Dot */
     .pickleball-app-wrapper.display-mode {
       justify-content: center;
       padding: 24px;
@@ -426,11 +428,13 @@
     .pickleball-app-wrapper.display-mode .fault-controls,
     .pickleball-app-wrapper.display-mode .fault-log,
     .pickleball-app-wrapper.display-mode .handicap-controls,
-    .pickleball-app-wrapper.display-mode .court,
     .pickleball-app-wrapper.display-mode .match-summary-log-container,
     .pickleball-app-wrapper.display-mode #initial-server-hud-row,
     .pickleball-app-wrapper.display-mode .game-target-row {
       display: none !important;
+    }
+    .pickleball-app-wrapper.display-mode .court {
+      display: flex !important;
     }
     .pickleball-app-wrapper.display-mode .sync-bar {
       display: flex !important;
@@ -490,6 +494,16 @@
     .pickleball-app-wrapper.display-mode .server-num-badge {
       font-size: 1.15rem;
       padding: 7px 14px;
+    }
+    .pickleball-app-wrapper.display-mode .player-input {
+      pointer-events: none;
+      border-bottom: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .pickleball-app-wrapper.display-mode .server-indicator {
+      font-size: 0.8rem;
+      font-weight: 800;
     }
   </style>
 </head>
@@ -552,7 +566,7 @@
         </div>
 
         <!-- Starting Server Selection Zone -->
-        <div id="initial-server-hud-row" class="game-target-row" style="margin-bottom: 10px;">
+        <div id="initial-server-hud-row" class="game-target-row" style="width: 100%; margin-top: 8px; margin-bottom: 10px;">
           <span>Starting Server:</span>
           <div class="server-toggle-group" style="display: inline-flex; background: #333; padding: 2px; border-radius: 6px; border: 1px solid #444;">
             <button type="button" id="toggle-serve-A" style="background: var(--team-a-score); color: #fff; border: none; padding: 4px 12px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer;">Team A</button>
@@ -688,6 +702,13 @@
       return JSON.parse(JSON.stringify(state));
     }
 
+    function createSnapshot() {
+      return {
+        state: clone(),
+        faultHistory: [...faultHistory]
+      };
+    }
+
     function getTeamScore(team) {
       return team === 'A' ? state.scoreA : state.scoreB;
     }
@@ -750,7 +771,7 @@
 
     function swapCourtPlayersCCW2() {
       if (state.gameOver) return;
-      history.push(clone());
+      history.push(createSnapshot());
 
       const valLeftTop = (document.getElementById('input-A-left').value || '').toUpperCase().slice(0, 3);
       const valLeftBottom = (document.getElementById('input-A-right').value || '').toUpperCase().slice(0, 3);
@@ -1110,9 +1131,9 @@
       return false;
     }
 
-    function awardPoint(winner) {
+    function awardPoint(winner, pushSnapshot = true) {
       if (state.gameOver) return;
-      history.push(clone());
+      if (pushSnapshot) history.push(createSnapshot());
       if (winner === 'A') state.scoreA++;
       else state.scoreB++;
 
@@ -1142,9 +1163,9 @@
       render();
     }
 
-    function handleServerFaultOrLoss() {
+    function handleServerFaultOrLoss(pushSnapshot = true) {
       if (state.gameOver) return;
-      history.push(clone());
+      if (pushSnapshot) history.push(createSnapshot());
 
       if (state.isOpeningServe) {
         state.isOpeningServe = false;
@@ -1178,29 +1199,31 @@
 
     function handleLeftFaultClick() {
       if (state.gameOver) return;
+      history.push(createSnapshot());
       const faultTeam = !isCourtSwitched() ? 'A' : 'B';
       addFaultEntry(faultTeam, 'Foot Fault');
       if (faultTeam === state.servingTeam) {
-        handleServerFaultOrLoss();
+        handleServerFaultOrLoss(false);
       } else {
-        awardPoint(faultTeam === 'A' ? 'B' : 'A');
+        awardPoint(faultTeam === 'A' ? 'B' : 'A', false);
       }
     }
 
     function handleRightFaultClick() {
       if (state.gameOver) return;
+      history.push(createSnapshot());
       const faultTeam = !isCourtSwitched() ? 'B' : 'A';
       addFaultEntry(faultTeam, 'Foot Fault');
       if (faultTeam === state.servingTeam) {
-        handleServerFaultOrLoss();
+        handleServerFaultOrLoss(false);
       } else {
-        awardPoint(faultTeam === 'A' ? 'B' : 'A');
+        awardPoint(faultTeam === 'A' ? 'B' : 'A', false);
       }
     }
 
     function applyHandicapPoint(team) {
       if (state.gameOver) return;
-      history.push(clone());
+      history.push(createSnapshot());
       if (team === 'A') state.scoreA++;
       else state.scoreB++;
 
@@ -1279,7 +1302,13 @@
 
     function undo() {
       if (!history.length) return;
-      state = history.pop();
+      const snapshot = history.pop();
+      if (snapshot && snapshot.state) {
+        state = snapshot.state;
+        faultHistory = Array.isArray(snapshot.faultHistory) ? [...snapshot.faultHistory] : [];
+      } else {
+        state = snapshot;
+      }
       const currentMatch = teamMatches[activeMatchIndex];
       if (currentMatch.completed && !state.gameOver) {
         currentMatch.completed = false;
@@ -1334,6 +1363,7 @@
       const matchSelect = document.getElementById('select-active-match');
       const teamAInput = document.getElementById('team-name-A');
       const teamBInput = document.getElementById('team-name-B');
+      const playerInputs = document.querySelectorAll('.pickleball-app-wrapper .player-input');
 
       if (mode === 'display') {
         wrapper.classList.add('display-mode');
@@ -1341,12 +1371,15 @@
         if (matchSelect) matchSelect.disabled = true;
         if (teamAInput) teamAInput.readOnly = true;
         if (teamBInput) teamBInput.readOnly = true;
+        playerInputs.forEach(input => { input.readOnly = true; });
+        requestLatestState();
       } else {
         wrapper.classList.remove('display-mode');
         btn.textContent = 'Display Mode';
         if (matchSelect) matchSelect.disabled = false;
         if (teamAInput) teamAInput.readOnly = false;
         if (teamBInput) teamBInput.readOnly = false;
+        playerInputs.forEach(input => { input.readOnly = false; });
       }
     }
 
@@ -1359,6 +1392,7 @@
 
     function buildSnapshot() {
       return {
+        type: 'score_update',
         roomId,
         state: clone(),
         teamMatches,
@@ -1397,46 +1431,73 @@
       }
     }
 
+    function requestLatestState() {
+      if (viewMode !== 'display') return;
+      const reqPayload = { type: 'request_state', roomId };
+      if (localChannel) {
+        localChannel.postMessage(reqPayload);
+      }
+      if (realtimeChannel) {
+        realtimeChannel.send({
+          type: 'broadcast',
+          event: 'request_state',
+          payload: reqPayload
+        });
+      }
+    }
+
     function initRealtimeSync() {
       if (localChannel) {
         localChannel.onmessage = (event) => {
-          if (viewMode === 'display') applyRemoteSnapshot(event.data);
+          const data = event.data;
+          if (!data || data.roomId !== roomId) return;
+          if (data.type === 'request_state' && viewMode === 'control') {
+            broadcastSnapshot();
+          } else if (viewMode === 'display') {
+            applyRemoteSnapshot(data);
+          }
         };
       }
 
       const hasSupabase =
         typeof window.supabase !== 'undefined' &&
-        typeof window.supabase.createClient === 'function' &&
         SUPABASE_CONFIG.url &&
-        SUPABASE_CONFIG.url.startsWith('https://') &&
-        SUPABASE_CONFIG.anonKey;
+        !SUPABASE_CONFIG.url.includes('YOUR_SUPABASE_URL') &&
+        SUPABASE_CONFIG.anonKey &&
+        !SUPABASE_CONFIG.anonKey.includes('YOUR_SUPABASE_ANON_KEY');
 
       if (!hasSupabase) {
-        setSyncIndicator(false, 'Local Tab Sync (No SDK/Key)');
+        setSyncIndicator(false, 'Local Tab Sync');
+        if (viewMode === 'display') requestLatestState();
         return;
       }
 
-      try {
-        const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-        realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
-          config: { broadcast: { self: false } }
-        });
+      const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+      realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
+        config: { broadcast: { self: false } }
+      });
 
-        realtimeChannel
-          .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-            if (viewMode === 'display') applyRemoteSnapshot(payload);
-          })
-          .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-              setSyncIndicator(true, 'Live Cloud');
-              if (viewMode === 'control') broadcastSnapshot();
-            } else {
-              setSyncIndicator(false, `Cloud: ${status}`);
+      realtimeChannel
+        .on('broadcast', { event: 'score_update' }, ({ payload }) => {
+          if (viewMode === 'display') applyRemoteSnapshot(payload);
+        })
+        .on('broadcast', { event: 'request_state' }, ({ payload }) => {
+          if (viewMode === 'control' && payload && payload.roomId === roomId) {
+            broadcastSnapshot();
+          }
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            setSyncIndicator(true, 'Live Cloud');
+            if (viewMode === 'control') {
+              broadcastSnapshot();
+            } else if (viewMode === 'display') {
+              requestLatestState();
             }
-          });
-      } catch (err) {
-        setSyncIndicator(false, `Cloud Error: ${err.message || 'init failed'}`);
-      }
+          } else {
+            setSyncIndicator(false, status);
+          }
+        });
     }
 
     document.getElementById('btn-toggle-qr').addEventListener('click', () => {
@@ -1475,8 +1536,9 @@
 
     document.getElementById('btn-fault-serve').addEventListener('click', () => {
       if (state.gameOver) return;
+      history.push(createSnapshot());
       addFaultEntry(state.servingTeam, 'Serve Fault');
-      handleServerFaultOrLoss();
+      handleServerFaultOrLoss(false);
     });
 
     document.getElementById('select-game-rules').addEventListener('change', (e) => {
@@ -1534,6 +1596,7 @@
 
     document.querySelectorAll('.pickleball-app-wrapper .player-node').forEach(node => {
       node.addEventListener('click', () => {
+        if (viewMode === 'display') return;
         if (node.id.includes('-A-')) {
           applyServingTeamSelection('A');
           render();
