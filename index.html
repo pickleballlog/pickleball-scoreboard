@@ -126,7 +126,7 @@
       border: 1px solid #333;
       padding: 16px 12px;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
     .pickleball-app-wrapper .server-banner {
       display: flex;
@@ -170,24 +170,14 @@
       flex-wrap: wrap;
       gap: 14px;
     }
-    .pickleball-app-wrapper .score-left, .pickleball-app-wrapper .score-right {
+    .pickleball-app-wrapper .score-left,
+    .pickleball-app-wrapper .score-right {
       font-size: 4rem;
       font-weight: 900;
     }
     .pickleball-app-wrapper .score-divider {
       color: #555;
       font-size: 2.5rem;
-    }
-    .pickleball-app-wrapper .server-num-badge {
-      background: #2e3b4e;
-      border: 1px solid #5c7cfa;
-      color: #e7f5ff;
-      font-size: 0.9rem;
-      font-weight: 800;
-      padding: 5px 10px;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     .pickleball-app-wrapper .court {
       background-color: var(--court-gray);
@@ -197,7 +187,7 @@
       flex-direction: row;
       aspect-ratio: 20 / 11;
       position: relative;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     }
     .pickleball-app-wrapper .court-half {
       width: 50%;
@@ -219,7 +209,7 @@
       font-size: 1.0rem;
       font-weight: 900;
       color: #ffeb3b;
-      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
       background: rgba(0, 0, 0, 0.6);
       padding: 4px 12px;
       border-radius: 14px;
@@ -236,7 +226,7 @@
       font-weight: bold;
       font-size: 0.7rem;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255, 255, 255, 0.8);
       writing-mode: vertical-lr;
       transform: rotate(180deg);
     }
@@ -257,7 +247,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      border-bottom: 2px dashed rgba(255,255,255,0.5);
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.5);
     }
     .pickleball-app-wrapper .quadrant:last-child {
       border-bottom: none;
@@ -273,7 +263,7 @@
     }
     .pickleball-app-wrapper .player-node {
       position: relative;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.8);
       padding: 6px 10px;
       border-radius: 20px;
       border: 2px solid transparent;
@@ -299,10 +289,10 @@
       border-bottom-color: var(--accent-gold);
     }
     .pickleball-app-wrapper .left-half .player-node {
-      border-color: rgba(76,175,80,0.4);
+      border-color: rgba(76, 175, 80, 0.4);
     }
     .pickleball-app-wrapper .right-half .player-node {
-      border-color: rgba(255,20,147,0.3);
+      border-color: rgba(255, 20, 147, 0.3);
     }
     .pickleball-app-wrapper .player-node.serving {
       border-color: var(--accent-gold) !important;
@@ -415,7 +405,7 @@
       font-size: 0.8rem;
     }
 
-    /* Display Mode: Keep Event + Scoring + Court Diagram + Server Indicator + Testing Sync Dot */
+    /* Display Mode */
     .pickleball-app-wrapper.display-mode {
       justify-content: center;
       padding: 24px;
@@ -436,7 +426,8 @@
     .pickleball-app-wrapper.display-mode .court {
       display: flex !important;
     }
-    .pickleball-app-wrapper.display-mode .sync-bar {
+    .pickleball-app-wrapper.display-mode .sync-bar,
+    .pickleball-app-wrapper.display-mode #sync-bar {
       display: flex !important;
       max-width: 820px;
       margin-bottom: 0;
@@ -490,10 +481,6 @@
     }
     .pickleball-app-wrapper.display-mode .score-divider {
       font-size: 4rem;
-    }
-    .pickleball-app-wrapper.display-mode .server-num-badge {
-      font-size: 1.15rem;
-      padding: 7px 14px;
     }
     .pickleball-app-wrapper.display-mode .player-input {
       pointer-events: none;
@@ -562,7 +549,6 @@
           <span id="score-left" class="score-left">0</span>
           <span class="score-divider">-</span>
           <span id="score-right" class="score-right">0</span>
-          <span id="server-num-badge" class="server-num-badge">Server 1</span>
         </div>
 
         <!-- Starting Server Selection Zone -->
@@ -882,7 +868,6 @@
     function updateBigScore() {
       const leftEl = document.getElementById('score-left');
       const rightEl = document.getElementById('score-right');
-      const serverNumEl = document.getElementById('server-num-badge');
       const container = document.querySelector('.pickleball-app-wrapper .score-callout');
 
       if (state.servingTeam === 'A') {
@@ -895,10 +880,6 @@
         rightEl.textContent = state.scoreA;
         leftEl.style.color = 'var(--team-b-score)';
         rightEl.style.color = 'var(--team-a-score)';
-      }
-
-      if (serverNumEl) {
-        serverNumEl.textContent = `Server ${state.serverNumber}`;
       }
 
       let deuceBadge = document.getElementById('deuce-indicator');
@@ -1406,14 +1387,21 @@
     function applyRemoteSnapshot(payload) {
       if (!payload || payload.roomId !== roomId) return;
       isApplyingRemoteState = true;
-      state = payload.state;
-      teamMatches = payload.teamMatches;
-      activeMatchIndex = payload.activeMatchIndex;
-      faultHistory = payload.faultHistory;
-      document.getElementById('team-name-A').value = payload.teamNameA;
-      document.getElementById('team-name-B').value = payload.teamNameB;
-      render();
-      isApplyingRemoteState = false;
+      try {
+        state = payload.state;
+        teamMatches = payload.teamMatches;
+        activeMatchIndex = payload.activeMatchIndex;
+        faultHistory = Array.isArray(payload.faultHistory) ? payload.faultHistory : [];
+        if (typeof payload.teamNameA === 'string') {
+          document.getElementById('team-name-A').value = payload.teamNameA;
+        }
+        if (typeof payload.teamNameB === 'string') {
+          document.getElementById('team-name-B').value = payload.teamNameB;
+        }
+        render();
+      } finally {
+        isApplyingRemoteState = false;
+      }
     }
 
     function broadcastSnapshot() {
