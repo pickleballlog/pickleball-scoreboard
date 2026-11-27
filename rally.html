@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pickleball Live Court Scoreboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .pickleball-app-wrapper {
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-main: #ffffff;
+      --text-dim: #aaaaaa;
+      --court-gray: #3a3a3a;
+      --kitchen-blue: #0d47a1;
+      --accent-gold: #ffb300;
+      --btn-gray: #424242;
+      --team-a-score: #2e7d32;
+      --team-b-score: #ff1493;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pickleball-app-wrapper * {
+      box-sizing: border-box;
+    }
+
+    .pickleball-app-wrapper .container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pickleball-app-wrapper .sync-bar {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+      position: relative;
+    }
+
+    .pickleball-app-wrapper .sync-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pickleball-app-wrapper .sync-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ffb300;
+      display: inline-block;
+    }
+
+    .pickleball-app-wrapper .sync-dot.live {
+      background: #4caf50;
+    }
+
+    .pickleball-app-wrapper .sync-status {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+
+    .pickleball-app-wrapper .sync-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pickleball-app-wrapper .btn-mini {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pickleball-app-wrapper .qr-popover {
+      position: absolute;
+      top: 46px;
+      right: 10px;
+      background: #ffffff;
+      color: #111111;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      text-align: center;
+      min-width: 184px;
+    }
+
+    .pickleball-app-wrapper .qr-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .pickleball-app-wrapper #qr-code-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 160px;
+    }
+
+    .pickleball-app-wrapper .qr-url-label {
+      margin-top: 8px;
+      font-size: 0.65rem;
+      max-width: 170px;
+      word-break: break-all;
+      color: #444;
+    }
+
+    .pickleball-app-wrapper .hud {
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid #333;
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .pickleball-app-wrapper .server-banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .pickleball-app-wrapper .banner-pill {
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+
+    .pickleball-app-wrapper .banner-detail {
+      background: #2b2b2b;
+      border: 1px solid #444;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .pickleball-app-wrapper .status-text {
+      font-size: 1.0rem;
+      color: var(--text-dim);
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .pickleball-app-wrapper .score-callout {
+      font-size: 4rem;
+      font-weight: 900;
+      margin: 6px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .pickleball-app-wrapper .score-left,
+    .pickleball-app-wrapper .score-right {
+      font-size: 4rem;
+      font-weight: 900;
+    }
+
+    .pickleball-app-wrapper .score-divider {
+      color: #555;
+      font-size: 2.5rem;
+    }
+
+    .pickleball-app-wrapper .server-num-badge {
+      background: #2e3b4e;
+      border: 1px solid #5c7cfa;
+      color: #e7f5ff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .pickleball-app-wrapper .court {
+      background-color: var(--court-gray);
+      border: 4px solid white;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: row;
+      aspect-ratio: 20 / 11;
+      position: relative;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .pickleball-app-wrapper .court-half {
+      width: 50%;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+    }
+
+    .pickleball-app-wrapper .left-half {
+      flex-direction: row-reverse;
+    }
+
+    .pickleball-app-wrapper .right-half {
+      flex-direction: row;
+    }
+
+    .pickleball-app-wrapper .baseline-label {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.0rem;
+      font-weight: 900;
+      color: #ffeb3b;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 4px 12px;
+      border-radius: 14px;
+      letter-spacing: 1px;
+      z-index: 15;
+      white-space: nowrap;
+    }
+
+    .pickleball-app-wrapper .kitchen {
+      width: 18%;
+      background-color: var(--kitchen-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.8);
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+    }
+
+    .pickleball-app-wrapper .left-half .kitchen {
+      border-left: 3px solid white;
+    }
+
+    .pickleball-app-wrapper .right-half .kitchen {
+      border-right: 3px solid white;
+    }
+
+    .pickleball-app-wrapper .baselines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pickleball-app-wrapper .quadrant {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.5);
+    }
+
+    .pickleball-app-wrapper .quadrant:last-child {
+      border-bottom: none;
+    }
+
+    .pickleball-app-wrapper .net {
+      width: 6px;
+      background-color: #111;
+      height: 100%;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    .pickleball-app-wrapper .player-node {
+      position: relative;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      text-align: center;
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .pickleball-app-wrapper .player-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #777;
+      color: #fff;
+      width: 80%;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+    }
+
+    .pickleball-app-wrapper .player-input:focus {
+      outline: none;
+      border-bottom-color: var(--accent-gold);
+    }
+
+    .pickleball-app-wrapper .left-half .player-node {
+      border-color: rgba(76, 175, 80, 0.4);
+    }
+
+    .pickleball-app-wrapper .right-half .player-node {
+      border-color: rgba(255, 20, 147, 0.3);
+    }
+
+    .pickleball-app-wrapper .player-node.serving {
+      border-color: var(--accent-gold) !important;
+      box-shadow: 0 0 12px var(--accent-gold);
+    }
+
+    .pickleball-app-wrapper .player-node.serving::before {
+      content: "SERVING";
+      position: absolute;
+      top: -10px;
+      background: var(--accent-gold);
+      color: #000;
+      font-size: 0.6rem;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .pickleball-app-wrapper .server-indicator {
+      color: var(--accent-gold);
+      font-size: 0.65rem;
+      display: block;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .pickleball-app-wrapper .controls {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .pickleball-app-wrapper .btn {
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+      transition: background 0.2s;
+    }
+
+    .pickleball-app-wrapper .btn:active {
+      opacity: 0.8;
+    }
+
+    .pickleball-app-wrapper .btn-teamA {
+      background-color: #2e7d32;
+    }
+
+    .pickleball-app-wrapper .btn-teamB {
+      background-color: var(--team-b-score);
+    }
+
+    .pickleball-app-wrapper .btn-utility {
+      background-color: var(--btn-gray);
+      grid-column: span 2;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+
+    .pickleball-app-wrapper .fault-controls {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .pickleball-app-wrapper .btn-fault {
+      padding: 10px;
+      font-size: 0.85rem;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .pickleball-app-wrapper .btn-fault:active {
+      opacity: 0.8;
+    }
+
+    .pickleball-app-wrapper #btn-fault-serve {
+      background-color: var(--accent-gold);
+      color: #000000;
+    }
+
+    .pickleball-app-wrapper .fault-log {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      max-height: 80px;
+      overflow-y: auto;
+      text-align: left;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #1b1b1b;
+      border: 1px solid #333;
+    }
+
+    .pickleball-app-wrapper .fault-log-entry {
+      margin-bottom: 2px;
+    }
+
+    .pickleball-app-wrapper .game-target-row {
+      margin-top: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+
+    .pickleball-app-wrapper .rules-badge {
+      background: #333;
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.8rem;
+    }
+
+    /* Display Mode */
+    .pickleball-app-wrapper.display-mode {
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pickleball-app-wrapper.display-mode .container {
+      max-width: 860px;
+      gap: 14px;
+    }
+
+    .pickleball-app-wrapper.display-mode .event-header,
+    .pickleball-app-wrapper.display-mode .controls,
+    .pickleball-app-wrapper.display-mode .fault-controls,
+    .pickleball-app-wrapper.display-mode .fault-log,
+    .pickleball-app-wrapper.display-mode .handicap-controls,
+    .pickleball-app-wrapper.display-mode .match-summary-log-container,
+    .pickleball-app-wrapper.display-mode .room-event-log-card,
+    .pickleball-app-wrapper.display-mode #initial-server-hud-row {
+      display: none !important;
+    }
+
+    .pickleball-app-wrapper.display-mode .sync-bar,
+    .pickleball-app-wrapper.display-mode #sync-bar {
+      display: flex !important;
+      max-width: 860px;
+      margin-bottom: 0;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+    }
+
+    .pickleball-app-wrapper.display-mode #room-code-text {
+      color: var(--accent-gold);
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+    }
+
+    .pickleball-app-wrapper.display-mode .sync-actions {
+      display: none;
+    }
+
+    .pickleball-app-wrapper.display-mode .game-target-row {
+      display: flex !important;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+
+    .pickleball-app-wrapper.display-mode #select-game-rules {
+      pointer-events: none;
+      appearance: none;
+      -webkit-appearance: none;
+      font-size: 0.95rem !important;
+      font-weight: 700;
+      padding: 4px 10px !important;
+    }
+
+    .pickleball-app-wrapper.display-mode .court {
+      display: flex !important;
+    }
+
+    .pickleball-app-wrapper.display-mode .player-input {
+      pointer-events: none;
+      border-bottom-color: transparent;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+
+    .pickleball-app-wrapper.display-mode .score-hud {
+      padding: 24px 18px;
+    }
+
+    .pickleball-app-wrapper.display-mode .banner-pill {
+      font-size: 1.05rem;
+      padding: 6px 16px;
+    }
+
+    .pickleball-app-wrapper.display-mode .banner-detail {
+      font-size: 0.95rem;
+      padding: 6px 12px;
+    }
+
+    .pickleball-app-wrapper.display-mode .status-text {
+      font-size: 1.15rem;
+      margin-top: 4px;
+    }
+
+    .pickleball-app-wrapper.display-mode .score-callout,
+    .pickleball-app-wrapper.display-mode .score-left,
+    .pickleball-app-wrapper.display-mode .score-right {
+      font-size: 5.5rem;
+    }
+
+    .pickleball-app-wrapper.display-mode .score-divider {
+      font-size: 3.5rem;
+    }
+
+    .pickleball-app-wrapper.display-mode .server-num-badge {
+      font-size: 1.1rem;
+      padding: 6px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="pickleball-app-wrapper">
+    <div id="sync-bar" class="sync-bar">
+      <div class="sync-left">
+        <span id="sync-dot" class="sync-dot"></span>
+        <span>Room: <strong id="room-code-text">----</strong></span>
+        <span id="sync-status-label" class="sync-status">Local</span>
+      </div>
+      <div class="sync-actions">
+        <button type="button" id="btn-toggle-qr" class="btn-mini">QR Link</button>
+        <button type="button" id="btn-switch-view" class="btn-mini">Display Mode</button>
+        <button type="button" id="btn-fullscreen" class="btn-mini">Full Screen</button>
+      </div>
+      <div id="qr-popover" class="qr-popover" style="display: none;">
+        <div class="qr-title">Scan for Big-Screen Display</div>
+        <div id="qr-code-box"></div>
+        <div id="qr-url-label" class="qr-url-label"></div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="hud event-header" style="background: #252525; border: 1px solid var(--accent-gold); margin-bottom: 8px; padding: 6px 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 0.75rem; color: var(--accent-gold); font-weight: bold; text-transform: uppercase; white-space: nowrap;">Event:</span>
+            <select id="select-active-match" style="background: #333; color: #fff; border: 1px solid #555; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+              <option value="0">Game 1: 男雙 VS 女雙</option>
+              <option value="1">Game 2: 男雙 VS 混雙</option>
+              <option value="2">Game 3: 混雙 VS 女雙</option>
+              <option value="3">Game 4: 同屬性對戰</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem;">
+            <input id="team-name-A" value="Team A" style="background:transparent; border:none; color:var(--team-a-score); font-weight:bold; text-align:right; width:70px; font-size:0.85rem;">
+            <span id="event-score-A" style="font-size: 1.1rem; font-weight: 900; color: var(--team-a-score);">0</span>
+            <span style="color: #777; font-weight: bold;">:</span>
+            <span id="event-score-B" style="font-size: 1.1rem; font-weight: 900; color: var(--team-b-score);">0</span>
+            <input id="team-name-B" value="Team B" style="background:transparent; border:none; color:var(--team-b-score); font-weight:bold; text-align:left; width:70px; font-size:0.85rem;">
+          </div>
+        </div>
+      </div>
+
+      <div class="hud score-hud">
+        <div id="server-banner" class="server-banner">
+          <span id="banner-team-pill" class="banner-pill">TEAM A SERVING</span>
+          <span id="banner-server-player" class="banner-detail">Server: A2 (1st)</span>
+          <span id="banner-court-side" class="banner-detail">EVEN (Right)</span>
+        </div>
+        <div class="status-text" id="status-display">Ready</div>
+        <div class="score-callout">
+          <span id="score-left" class="score-left">0</span>
+          <span class="score-divider">-</span>
+          <span id="score-right" class="score-right">0</span>
+        </div>
+
+        <div id="initial-server-hud-row" class="game-target-row" style="margin-bottom: 10px;">
+          <span>Starting Server:</span>
+          <div class="server-toggle-group" style="display: inline-flex; background: #333; padding: 2px; border-radius: 6px; border: 1px solid #444;">
+            <button type="button" id="toggle-serve-A" style="background: var(--team-a-score); color: #fff; border: none; padding: 4px 12px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer;">Team A</button>
+            <button type="button" id="toggle-serve-B" style="background: transparent; color: #aaa; border: none; padding: 4px 12px; font-size: 0.8rem; font-weight: bold; border-radius: 4px; cursor: pointer;">Team B</button>
+          </div>
+        </div>
+        <div class="game-target-row">
+          <span>Game Rules:</span>
+          <select class="rules-badge" id="select-game-rules" style="background: #333; color: #fff; border: none; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; cursor: pointer;">
+            <option value="15">15 Points (Switch at 8)</option>
+            <option value="21">21 Points (Switch at 11)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="handicap-controls" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 8px;">
+        <button type="button" class="btn btn-teamA" id="btn-handicap-left" style="padding: 10px; font-size: 0.9rem;">+1 Handicap (Left Side)</button>
+        <button type="button" class="btn btn-teamB" id="btn-handicap-right" style="padding: 10px; font-size: 0.9rem;">+1 Handicap (Right Side)</button>
+      </div>
+
+      <div class="court">
+        <div class="court-half left-half">
+          <div class="baseline-label" id="baseline-label-left">L</div>
+          <div class="kitchen">Kitchen</div>
+          <div class="baselines">
+            <div class="quadrant">
+              <div class="player-node" id="p-A-left">
+                <input id="input-A-left" class="player-input" maxlength="3" value="A1">
+              </div>
+            </div>
+            <div class="quadrant">
+              <div class="player-node" id="p-A-right">
+                <input id="input-A-right" class="player-input" maxlength="3" value="A2">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="net"></div>
+        <div class="court-half right-half">
+          <div class="baseline-label" id="baseline-label-right">R</div>
+          <div class="kitchen">Kitchen</div>
+          <div class="baselines">
+            <div class="quadrant">
+              <div class="player-node" id="p-B-right">
+                <input id="input-B-right" class="player-input" maxlength="3" value="B1">
+              </div>
+            </div>
+            <div class="quadrant">
+              <div class="player-node" id="p-B-left">
+                <input id="input-B-left" class="player-input" maxlength="3" value="B2">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button type="button" class="btn btn-teamA" id="btn-win-A">Team A Won Rally</button>
+        <button type="button" class="btn btn-win-B btn-teamB" id="btn-win-B">Team B Won Rally</button>
+        <button type="button" class="btn btn-utility" id="btn-swap-court-ccw2">Swap Court (CCW 2 Moves)</button>
+        <button type="button" class="btn btn-utility" id="btn-undo">Undo Last Move</button>
+        <button type="button" class="btn btn-utility" id="btn-reset">Reset Game</button>
+      </div>
+
+      <div class="fault-controls">
+        <button type="button" class="btn btn-fault" id="btn-fault-A">Team A Foot Fault</button>
+        <button type="button" class="btn btn-fault" id="btn-fault-serve">Serve Fault</button>
+        <button type="button" class="btn btn-fault" id="btn-fault-B">Team B Foot Fault</button>
+      </div>
+      <div class="fault-log" id="fault-log"></div>
+
+      <div class="hud match-summary-log-container" style="margin-top: 12px; text-align: left;">
+        <div style="font-weight: bold; color: var(--accent-gold); font-size: 0.9rem; margin-bottom: 6px; text-transform: uppercase;">Team Match Summary Log</div>
+        <div id="match-summary-log" style="font-size: 0.8rem; color: #ddd; display: flex; flex-direction: column; gap: 4px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PUBLIC_APP_URL = 'https://pickleballlog.github.io/pickleball-scoreboard/';
+    const SUPABASE_CONFIG = {
+      url: 'https://bfdqwreulrfsulvdrlzk.supabase.co',
+      anonKey: 'sb_publishable_Vo2M8B6ptaLBPbtGK557aw_vTXFoqoF'
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = (urlParams.get('room') || Math.random().toString(36).substring(2, 6)).toUpperCase();
+    let viewMode = urlParams.get('view') === 'display' ? 'display' : 'control';
+    let isApplyingRemoteState = false;
+    let realtimeChannel = null;
+    const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`pb-room-${roomId}`) : null;
+
+    let history = [];
+    let faultHistory = [];
+
+    let teamMatches = [
+      { name: "男雙 VS 女雙", teamAPlayers: ['M1', 'M2'], teamBPlayers: ['W1', 'W2'], scoreA: 0, scoreB: 0, completed: false, winner: null },
+      { name: "男雙 VS 混雙", teamAPlayers: ['M1', 'M2'], teamBPlayers: ['M3', 'W3'], scoreA: 0, scoreB: 0, completed: false, winner: null },
+      { name: "混雙 VS 女雙", teamAPlayers: ['M1', 'W1'], teamBPlayers: ['W2', 'W3'], scoreA: 0, scoreB: 0, completed: false, winner: null },
+      { name: "同屬性對戰", teamAPlayers: ['A1', 'A2'], teamBPlayers: ['B1', 'B2'], scoreA: 0, scoreB: 0, completed: false, winner: null }
+    ];
+
+    let activeMatchIndex = 0;
+    let state = {
+      scoreA: 0,
+      scoreB: 0,
+      gameTarget: 15,
+      switchTarget: 8,
+      gameOver: false,
+      servingTeam: 'A',
+      serverNumber: 1,
+      isOpeningServe: true,
+      servingPlayer: 'A2',
+      servingSide: 'even',
+      positions: { A_left: 'A1', A_right: 'A2', B_left: 'B2', B_right: 'B1' },
+      endsSwitchedAt8: false,
+      manualSwap: false,
+      switchBadgeDismissed: false
+    };
+
+    const clone = () => JSON.parse(JSON.stringify(state));
+    const getTeamScore = (team) => (team === 'A' ? state.scoreA : state.scoreB);
+    const isCourtSwitched = () => state.endsSwitchedAt8 !== (state.manualSwap || false);
+    const getServerLabelOrdinal = (num) => (num === 1 ? '1st' : '2nd');
+    const getTeamNames = () => ({
+      nameA: document.getElementById('team-name-A').value,
+      nameB: document.getElementById('team-name-B').value
+    });
+
+    function getServerForTeam(team) {
+      const serveOdd = getTeamScore(team) % 2 === 1;
+      if (team === 'A') return serveOdd ? state.positions.A_left : state.positions.A_right;
+      return serveOdd ? state.positions.B_left : state.positions.B_right;
+    }
+
+    function refreshServerState(team = state.servingTeam) {
+      const serveOdd = getTeamScore(team) % 2 === 1;
+      state.servingPlayer = getServerForTeam(team);
+      state.servingSide = serveOdd ? 'odd' : 'even';
+    }
+
+    function applyServingTeamSelection(team) {
+      state.servingTeam = team;
+      state.serverNumber = 1;
+      state.isOpeningServe = true;
+      refreshServerState(team);
+    }
+
+    function readCourtInputs() {
+      const read = (id, fallback) => ((document.getElementById(id).value || '').toUpperCase().slice(0, 3)) || fallback;
+      return {
+        leftTop: read('input-A-left', 'A1'),
+        leftBottom: read('input-A-right', 'A2'),
+        rightTop: read('input-B-left', 'B2'),
+        rightBottom: read('input-B-right', 'B1')
+      };
+    }
+
+    function remapServingPlayer(oldPositions) {
+      const map = {
+        [oldPositions.A_left]: state.positions.A_left,
+        [oldPositions.A_right]: state.positions.A_right,
+        [oldPositions.B_right]: state.positions.B_right,
+        [oldPositions.B_left]: state.positions.B_left
+      };
+      state.servingPlayer = Object.prototype.hasOwnProperty.call(map, state.servingPlayer)
+        ? map[state.servingPlayer]
+        : getServerForTeam(state.servingTeam);
+    }
+
+    function syncMatchRoster() {
+      const m = teamMatches[activeMatchIndex];
+      m.teamAPlayers = [state.positions.A_left, state.positions.A_right];
+      m.teamBPlayers = [state.positions.B_right, state.positions.B_left];
+    }
+
+    function updateCourtNamesFromInputs() {
+      const { leftTop, leftBottom, rightTop, rightBottom } = readCourtInputs();
+      const oldPositions = Object.assign({}, state.positions);
+      if (!isCourtSwitched()) {
+        state.positions = { A_left: leftTop, A_right: leftBottom, B_left: rightTop, B_right: rightBottom };
+      } else {
+        state.positions = { B_left: leftTop, B_right: leftBottom, A_left: rightTop, A_right: rightBottom };
+      }
+      remapServingPlayer(oldPositions);
+      syncMatchRoster();
+    }
+
+    function swapCourtPlayersCCW2() {
+      if (state.gameOver) return;
+      history.push(clone());
+      const { leftTop, leftBottom, rightTop, rightBottom } = readCourtInputs();
+      const oldPositions = Object.assign({}, state.positions);
+      if (!isCourtSwitched()) {
+        state.positions = { A_left: rightTop, A_right: rightBottom, B_left: leftTop, B_right: leftBottom };
+      } else {
+        state.positions = { B_left: rightTop, B_right: rightBottom, A_left: leftTop, A_right: leftBottom };
+      }
+      remapServingPlayer(oldPositions);
+      syncMatchRoster();
+      recordRoomEvent('system', 'COURT SWAP', 'Manual CCW court swap');
+      render();
+    }
+
+    function clearServingHighlight() {
+      document.querySelectorAll('.pickleball-app-wrapper .player-node').forEach(node => {
+        node.classList.remove('serving');
+        const old = node.querySelector('.server-indicator');
+        if (old) old.remove();
+      });
+    }
+
+    function highlightServer() {
+      clearServingHighlight();
+      if (!Object.values(state.positions).includes(state.servingPlayer)) {
+        state.servingPlayer = getServerForTeam(state.servingTeam);
+      }
+      const switched = isCourtSwitched();
+      const matchPos = (team, side) => state.positions[`${team}_${side}`] === state.servingPlayer;
+      let nodeId = null;
+      if (state.servingTeam === 'A') {
+        if (matchPos('A', 'left')) nodeId = !switched ? 'p-A-left' : 'p-B-left';
+        if (matchPos('A', 'right')) nodeId = !switched ? 'p-A-right' : 'p-B-right';
+      } else {
+        if (matchPos('B', 'left')) nodeId = !switched ? 'p-B-left' : 'p-A-left';
+        if (matchPos('B', 'right')) nodeId = !switched ? 'p-B-right' : 'p-A-right';
+      }
+      const node = nodeId && document.getElementById(nodeId);
+      if (!node) return;
+      node.classList.add('serving');
+      const badge = document.createElement('span');
+      badge.className = 'server-indicator';
+      badge.textContent = `${getServerLabelOrdinal(state.serverNumber)} Server`;
+      node.appendChild(badge);
+    }
+
+    function updateServerBanner() {
+      const pillEl = document.getElementById('banner-team-pill');
+      const playerEl = document.getElementById('banner-server-player');
+      const sideEl = document.getElementById('banner-court-side');
+      if (!pillEl || !playerEl || !sideEl) return;
+
+      const { nameA, nameB } = getTeamNames();
+      const servingName = state.servingTeam === 'A' ? nameA : nameB;
+      const isOdd = state.servingSide === 'odd';
+
+      pillEl.textContent = state.gameOver ? 'GAME OVER' : `${servingName} SERVING`;
+      pillEl.style.background = state.servingTeam === 'A' ? 'var(--team-a-score)' : 'var(--team-b-score)';
+      pillEl.style.color = '#ffffff';
+      playerEl.textContent = `Server: ${state.servingPlayer} (${getServerLabelOrdinal(state.serverNumber)})`;
+      sideEl.textContent = `${isOdd ? 'ODD' : 'EVEN'} (${isOdd ? 'Left' : 'Right'})`;
+    }
+
+    function updateStatus() {
+      const statusEl = document.getElementById('status-display');
+      const { nameA, nameB } = getTeamNames();
+      if (state.gameOver) {
+        const winner = state.scoreA > state.scoreB ? nameA : nameB;
+        statusEl.textContent = `${winner} Wins! Final Score: ${state.scoreA}-${state.scoreB}`;
+        statusEl.style.color = 'var(--accent-gold)';
+      } else {
+        statusEl.textContent = 'Ready';
+        statusEl.style.color = 'var(--text-dim)';
+      }
+    }
+
+    function makeHudBadge(id, text, bg, color, fontSize, letterSpacing) {
+      const el = document.createElement('div');
+      el.id = id;
+      el.style.fontSize = fontSize;
+      el.style.fontWeight = 'bold';
+      el.style.backgroundColor = bg;
+      el.style.color = color;
+      el.style.padding = '4px 8px';
+      el.style.borderRadius = '4px';
+      el.style.textTransform = 'uppercase';
+      el.style.letterSpacing = letterSpacing;
+      el.textContent = text;
+      return el;
+    }
+
+    function updateBigScore() {
+      const leftEl = document.getElementById('score-left');
+      const rightEl = document.getElementById('score-right');
+      const serverNumEl = document.getElementById('server-num-badge');
+      const container = document.querySelector('.pickleball-app-wrapper .score-callout');
+
+      const servingA = state.servingTeam === 'A';
+      leftEl.textContent = servingA ? state.scoreA : state.scoreB;
+      rightEl.textContent = servingA ? state.scoreB : state.scoreA;
+      leftEl.style.color = servingA ? 'var(--team-a-score)' : 'var(--team-b-score)';
+      rightEl.style.color = servingA ? 'var(--team-b-score)' : 'var(--team-a-score)';
+
+      if (serverNumEl) serverNumEl.textContent = `Server ${state.serverNumber}`;
+
+      document.getElementById('deuce-indicator')?.remove();
+      document.getElementById('switch-indicator')?.remove();
+
+      const deuceThreshold = state.gameTarget - 1;
+      if (state.scoreA >= deuceThreshold && state.scoreB >= deuceThreshold && state.scoreA === state.scoreB) {
+        container.appendChild(makeHudBadge('deuce-indicator', 'Deuce', 'var(--accent-gold)', '#000000', '0.9rem', '1px'));
+      }
+      if (state.endsSwitchedAt8 && !state.switchBadgeDismissed) {
+        const switchBadge = makeHudBadge('switch-indicator', `Ends Switched (at ${state.switchTarget})`, '#1565c0', '#ffffff', '0.8rem', '0.5px');
+        switchBadge.style.cursor = 'pointer';
+        switchBadge.style.userSelect = 'none';
+        switchBadge.addEventListener('click', () => {
+          state.switchBadgeDismissed = true;
+          switchBadge.remove();
+          broadcastSnapshot();
+        });
+        container.appendChild(switchBadge);
+      }
+    }
+
+    function renderFaultLog() {
+      const logEl = document.getElementById('fault-log');
+      logEl.innerHTML = '';
+      faultHistory.slice(-10).forEach(entry => {
+        const div = document.createElement('div');
+        div.className = 'fault-log-entry';
+        div.textContent = entry;
+        logEl.appendChild(div);
+      });
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderBaselineLabels() {
+      const leftLabel = document.getElementById('baseline-label-left');
+      const rightLabel = document.getElementById('baseline-label-right');
+      const { nameA, nameB } = getTeamNames();
+      leftLabel.textContent = !isCourtSwitched() ? nameA : nameB;
+      rightLabel.textContent = !isCourtSwitched() ? nameB : nameA;
+    }
+
+    function writePositionsToInputs() {
+      if (document.activeElement && document.activeElement.classList.contains('player-input')) return;
+      const { A_left, A_right, B_left, B_right } = state.positions;
+      const vals = !isCourtSwitched() ? [A_left, A_right, B_left, B_right] : [B_left, B_right, A_left, A_right];
+      ['input-A-left', 'input-A-right', 'input-B-left', 'input-B-right'].forEach((id, i) => {
+        document.getElementById(id).value = vals[i];
+      });
+    }
+
+    function renderSwappedActionButtons() {
+      const { nameA, nameB } = getTeamNames();
+      const colorA = '#2e7d32';
+      const colorB = 'var(--team-b-score)';
+      const leftIsA = !isCourtSwitched();
+      const leftName = leftIsA ? nameA : nameB;
+      const rightName = leftIsA ? nameB : nameA;
+      const leftColor = leftIsA ? colorA : colorB;
+      const rightColor = leftIsA ? colorB : colorA;
+
+      const setBtn = (id, text, bg) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = text;
+        el.style.backgroundColor = bg;
+      };
+
+      setBtn('btn-win-A', `${leftName} Won Rally`, leftColor);
+      setBtn('btn-win-B', `${rightName} Won Rally`, rightColor);
+      setBtn('btn-fault-A', `${leftName} Foot Fault`, leftColor);
+      setBtn('btn-fault-B', `${rightName} Foot Fault`, rightColor);
+      setBtn('btn-handicap-left', `+1 Handicap ${leftName}`, leftColor);
+      setBtn('btn-handicap-right', `+1 Handicap ${rightName}`, rightColor);
+    }
+
+    function styleServeToggle(btn, active, activeBg) {
+      btn.style.background = active ? activeBg : 'transparent';
+      btn.style.color = active ? '#fff' : '#aaa';
+    }
+
+    function renderInitialServerToggle() {
+      const toggleA = document.getElementById('toggle-serve-A');
+      const toggleB = document.getElementById('toggle-serve-B');
+      const { nameA, nameB } = getTeamNames();
+      toggleA.textContent = nameA;
+      toggleB.textContent = nameB;
+      document.getElementById('initial-server-hud-row').style.display = 'flex';
+      styleServeToggle(toggleA, state.servingTeam === 'A', 'var(--team-a-score)');
+      styleServeToggle(toggleB, state.servingTeam === 'B', 'var(--team-b-score)');
+    }
+
+    function renderMatchSummaryLog() {
+      const logEl = document.getElementById('match-summary-log');
+      logEl.innerHTML = '';
+      let totalWinsA = 0;
+      let totalWinsB = 0;
+      const { nameA, nameB } = getTeamNames();
+
+      teamMatches.forEach((match, idx) => {
+        if (match.completed) {
+          if (match.winner === 'A') totalWinsA++;
+          if (match.winner === 'B') totalWinsB++;
+        }
+        const isActive = idx === activeMatchIndex;
+        const div = document.createElement('div');
+        div.style.padding = '4px 6px';
+        div.style.borderRadius = '4px';
+        div.style.background = isActive ? '#2d2d2d' : 'transparent';
+        div.style.borderLeft = isActive ? '3px solid var(--accent-gold)' : 'none';
+        const statusStr = match.completed
+          ? `<b style="color: ${match.winner === 'A' ? 'var(--team-a-score)' : 'var(--team-b-score)'}">${match.winner === 'A' ? nameA : nameB} Won (${match.scoreA}-${match.scoreB})</b>`
+          : (isActive ? `<span style="color:var(--accent-gold)">In Progress (${state.scoreA}-${state.scoreB}, Server ${state.serverNumber})</span>` : `<span>Pending</span>`);
+        div.innerHTML = `<div><b>Game ${idx + 1} [${match.name}]:</b> ${statusStr}</div>`;
+        logEl.appendChild(div);
+      });
+
+      document.getElementById('event-score-A').textContent = totalWinsA;
+      document.getElementById('event-score-B').textContent = totalWinsB;
+    }
+
+    const ROOM_LOG_STORAGE_KEY = `pb_match_log_${roomId}`;
+    let matchEventLog = loadStoredRoomLog();
+
+    function loadStoredRoomLog() {
+      try {
+        const raw = localStorage.getItem(ROOM_LOG_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveStoredRoomLog() {
+      try {
+        localStorage.setItem(ROOM_LOG_STORAGE_KEY, JSON.stringify(matchEventLog));
+      } catch (_) {}
+    }
+
+    function recordRoomEvent(category, actionType, detail) {
+      if (viewMode !== 'control' || isApplyingRemoteState) return;
+      const { nameA, nameB } = getTeamNames();
+      const matchObj = teamMatches[activeMatchIndex] || {};
+      const now = new Date();
+      const entry = {
+        seq: matchEventLog.length + 1,
+        timestamp: now.toISOString(),
+        timeLabel: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        roomId,
+        gameNumber: activeMatchIndex + 1,
+        eventName: matchObj.name || `Game ${activeMatchIndex + 1}`,
+        category,
+        actionType,
+        scoreA: state.scoreA,
+        scoreB: state.scoreB,
+        scoreLabel: `${state.scoreA}-${state.scoreB}`,
+        servingTeam: state.servingTeam === 'A' ? nameA : nameB,
+        servingPlayer: state.servingPlayer,
+        serverNumber: state.serverNumber,
+        detail
+      };
+      matchEventLog.push(entry);
+      saveStoredRoomLog();
+    }
+
+    function downloadFile(filename, content, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportRoomLogCsv() {
+      const headers = [
+        'seq', 'timestamp', 'room_id', 'game_number', 'event_name',
+        'category', 'action_type', 'score_a', 'score_b',
+        'serving_team', 'serving_player', 'server_number', 'detail'
+      ];
+      const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+      const rows = matchEventLog.map(r => [
+        r.seq, r.timestamp, r.roomId, r.gameNumber, r.eventName,
+        r.category, r.actionType, r.scoreA, r.scoreB,
+        r.servingTeam, r.servingPlayer, r.serverNumber, r.detail
+      ].map(escapeCsv).join(','));
+      const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      downloadFile(`pickleball-room-${roomId}-log-${stamp}.csv`, csv, 'text/csv;charset=utf-8;');
+    }
+
+    function exportRoomLogJson() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        roomId,
+        totalEvents: matchEventLog.length,
+        teamMatches,
+        events: matchEventLog
+      };
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      downloadFile(`pickleball-room-${roomId}-log-${stamp}.json`, JSON.stringify(payload, null, 2), 'application/json');
+    }
+
+    function ensureRoomLogUI() {
+      const container = document.querySelector('.pickleball-app-wrapper .container');
+      const summaryCard = document.querySelector('.pickleball-app-wrapper .match-summary-log-container');
+      if (!container || document.getElementById('room-event-log-card')) return;
+
+      const card = document.createElement('div');
+      card.id = 'room-event-log-card';
+      card.className = 'hud room-event-log-card';
+      card.style.cssText = 'margin-top: 12px; text-align: left;';
+      card.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+          <div style="font-weight:bold; color:var(--accent-gold); font-size:0.9rem; text-transform:uppercase;">
+            Room <span id="log-room-badge">${roomId}</span> Rally &amp; Fault Log (<span id="room-log-count">0</span>)
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button type="button" id="btn-export-csv" class="btn-mini">Export CSV</button>
+            <button type="button" id="btn-export-json" class="btn-mini">Export JSON</button>
+            <button type="button" id="btn-clear-room-log" class="btn-mini">Clear Log</button>
+          </div>
+        </div>
+        <div id="room-event-log-list" style="max-height:190px; overflow-y:auto; background:#161616; border:1px solid #333; border-radius:6px; padding:6px 8px; font-size:0.78rem; display:flex; flex-direction:column; gap:4px;"></div>
+      `;
+
+      if (summaryCard && summaryCard.parentNode === container) {
+        container.insertBefore(card, summaryCard);
+      } else {
+        container.appendChild(card);
+      }
+
+      document.getElementById('btn-export-csv').addEventListener('click', exportRoomLogCsv);
+      document.getElementById('btn-export-json').addEventListener('click', exportRoomLogJson);
+      document.getElementById('btn-clear-room-log').addEventListener('click', () => {
+        matchEventLog = [];
+        saveStoredRoomLog();
+        renderRoomEventLog();
+        broadcastSnapshot();
+      });
+    }
+
+    function renderRoomEventLog() {
+      ensureRoomLogUI();
+      const badge = document.getElementById('log-room-badge');
+      const countEl = document.getElementById('room-log-count');
+      const listEl = document.getElementById('room-event-log-list');
+      if (badge) badge.textContent = roomId;
+      if (countEl) countEl.textContent = String(matchEventLog.length);
+      if (!listEl) return;
+
+      if (!matchEventLog.length) {
+        listEl.innerHTML = `<div style="color:var(--text-dim); padding:4px;">No rallies or faults logged in Room ${roomId} yet.</div>`;
+        return;
+      }
+
+      const borderColors = { rally: '#4caf50', fault: '#ff9800', system: '#64b5f6' };
+      listEl.innerHTML = matchEventLog.slice(-50).map(item => `
+        <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:6px; padding:4px 6px; border-radius:4px; background:#202020; border-left:3px solid ${borderColors[item.category] || '#555'};">
+          <span style="color:var(--text-dim); font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:0.72rem;">#${item.seq} ${item.timeLabel}</span>
+          <span style="background:#2d2d2d; color:#fff; font-weight:800; padding:1px 6px; border-radius:4px; font-size:0.74rem;">${item.scoreLabel}</span>
+          <span style="color:#e6e6e6;"><b>[G${item.gameNumber} ${item.actionType}]</b> ${item.detail}</span>
+        </div>
+      `).join('');
+      listEl.scrollTop = listEl.scrollHeight;
+    }
+
+    function getBaseAppUrl() {
+      return PUBLIC_APP_URL
+        ? PUBLIC_APP_URL.replace(/\/+$/, '') + '/'
+        : window.location.href.split('?')[0];
+    }
+
+    function getDisplayShareUrl(targetRoomId = roomId) {
+      return `${getBaseAppUrl()}?view=display&room=${encodeURIComponent(targetRoomId)}`;
+    }
+
+    function render() {
+      writePositionsToInputs();
+      updateServerBanner();
+      highlightServer();
+      updateStatus();
+      updateBigScore();
+      renderFaultLog();
+      renderRoomEventLog();
+      renderBaselineLabels();
+      renderSwappedActionButtons();
+      renderInitialServerToggle();
+      renderMatchSummaryLog();
+      document.getElementById('select-game-rules').value = state.gameTarget;
+      broadcastSnapshot();
+    }
+
+    function swapWithinTeam(team) {
+      const keyLeft = `${team}_left`;
+      const keyRight = `${team}_right`;
+      const tmp = state.positions[keyLeft];
+      state.positions[keyLeft] = state.positions[keyRight];
+      state.positions[keyRight] = tmp;
+    }
+
+    function checkSwitchAndGameOver() {
+      if (!state.endsSwitchedAt8 && (state.scoreA >= state.switchTarget || state.scoreB >= state.switchTarget)) {
+        state.endsSwitchedAt8 = true;
+        state.switchBadgeDismissed = false;
+        recordRoomEvent('system', 'ENDS SWITCHED', `Reached ${state.switchTarget} pts switch mark`);
+      }
+      const a = state.scoreA;
+      const b = state.scoreB;
+      const target = state.gameTarget;
+      if ((a >= target || b >= target) && Math.abs(a - b) >= 2) {
+        state.gameOver = true;
+        const { nameA, nameB } = getTeamNames();
+        const winnerTeam = a > b ? 'A' : 'B';
+        const currentMatch = teamMatches[activeMatchIndex];
+        currentMatch.completed = true;
+        currentMatch.scoreA = a;
+        currentMatch.scoreB = b;
+        currentMatch.winner = winnerTeam;
+        recordRoomEvent('system', 'GAME FINAL', `${winnerTeam === 'A' ? nameA : nameB} won ${a}-${b}`);
+        updateServerBanner();
+        updateStatus();
+        updateBigScore();
+        return true;
+      }
+      return false;
+    }
+
+    function awardPoint(winner, customDetail) {
+      if (state.gameOver) return;
+      history.push(clone());
+      const { nameA, nameB } = getTeamNames();
+      const winName = winner === 'A' ? nameA : nameB;
+      const wasServing = winner === state.servingTeam;
+
+      if (winner === 'A') state.scoreA++;
+      else state.scoreB++;
+
+      state.isOpeningServe = false;
+      if (wasServing) {
+        swapWithinTeam(winner);
+      } else {
+        state.servingTeam = winner;
+        state.serverNumber = 1;
+      }
+      refreshServerState(winner);
+      const outcomeText = customDetail || (wasServing
+        ? `${winName} scored on serve (${state.servingPlayer}, ${getServerLabelOrdinal(state.serverNumber)} server)`
+        : `${winName} won rally & side-out point (${state.servingPlayer}, 1st server)`);
+      recordRoomEvent('rally', 'WON RALLY', outcomeText);
+      checkSwitchAndGameOver();
+      render();
+    }
+
+    function handleServerFaultOrLoss(fromFault = false) {
+      if (state.gameOver) return;
+      history.push(clone());
+      const { nameA, nameB } = getTeamNames();
+      const prevTeamName = state.servingTeam === 'A' ? nameA : nameB;
+      const prevPlayer = state.servingPlayer;
+      const prevNum = state.serverNumber;
+
+      if (state.isOpeningServe) {
+        state.isOpeningServe = false;
+        state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A';
+        state.serverNumber = 1;
+      } else if (state.serverNumber === 1) {
+        state.serverNumber = 2;
+      } else {
+        state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A';
+        state.serverNumber = 1;
+      }
+
+      refreshServerState(state.servingTeam);
+      if (!fromFault) {
+        const nextTeamName = state.servingTeam === 'A' ? nameA : nameB;
+        recordRoomEvent(
+          'rally',
+          'SERVER CHANGE',
+          `${prevTeamName} (${prevPlayer}, ${getServerLabelOrdinal(prevNum)}) lost serve → ${nextTeamName} (${state.servingPlayer}, ${getServerLabelOrdinal(state.serverNumber)})`
+        );
+      }
+      checkSwitchAndGameOver();
+      render();
+    }
+
+    function applyHandicapPoint(team) {
+      if (state.gameOver) return;
+      history.push(clone());
+      const { nameA, nameB } = getTeamNames();
+      if (team === 'A') state.scoreA++;
+      else state.scoreB++;
+      refreshServerState(team);
+      recordRoomEvent('rally', 'HANDICAP +1', `+1 Handicap point awarded to ${team === 'A' ? nameA : nameB}`);
+      checkSwitchAndGameOver();
+      render();
+    }
+
+    const resolveSideTeam = (side) => {
+      const switched = isCourtSwitched();
+      if (side === 'left') return !switched ? 'A' : 'B';
+      return !switched ? 'B' : 'A';
+    };
+
+    function handleSideFault(side) {
+      if (state.gameOver) return;
+      const faultTeam = resolveSideTeam(side);
+      const { nameA, nameB } = getTeamNames();
+      const offenderTeam = faultTeam === 'A' ? nameA : nameB;
+      addFaultEntry(faultTeam, 'Foot Fault');
+      recordRoomEvent('fault', 'FOOT FAULT', `${offenderTeam} Foot Fault at ${state.scoreA}-${state.scoreB}`);
+      if (faultTeam === state.servingTeam) {
+        handleServerFaultOrLoss(true);
+      } else {
+        const winnerTeam = faultTeam === 'A' ? 'B' : 'A';
+        const winnerName = winnerTeam === 'A' ? nameA : nameB;
+        awardPoint(winnerTeam, `${winnerName} awarded point from ${offenderTeam} Foot Fault`);
+      }
+    }
+
+    function addFaultEntry(team, type) {
+      const { nameA, nameB } = getTeamNames();
+      const teamLabel = team === 'A' ? nameA : nameB;
+      const playerLabel = team === state.servingTeam
+        ? `${state.servingPlayer} (${getServerLabelOrdinal(state.serverNumber)})`
+        : 'RECEIVER';
+      faultHistory.push(`${teamLabel} (${playerLabel}) - ${type} at ${state.scoreA}-${state.scoreB}`);
+      renderFaultLog();
+    }
+
+    function loadMatch(index) {
+      activeMatchIndex = index;
+      const match = teamMatches[index];
+      history = [];
+      faultHistory = [];
+      state.positions = {
+        A_left: match.teamAPlayers[0],
+        A_right: match.teamAPlayers[1],
+        B_right: match.teamBPlayers[0],
+        B_left: match.teamBPlayers[1]
+      };
+      state.scoreA = match.scoreA || 0;
+      state.scoreB = match.scoreB || 0;
+      state.gameOver = match.completed || false;
+      state.servingTeam = 'A';
+      state.serverNumber = 1;
+      state.isOpeningServe = true;
+      state.servingPlayer = state.positions.A_right;
+      state.servingSide = 'even';
+      state.endsSwitchedAt8 = false;
+      state.manualSwap = false;
+      state.switchBadgeDismissed = false;
+      const chosenTarget = parseInt(document.getElementById('select-game-rules').value, 10) || 15;
+      state.gameTarget = chosenTarget;
+      state.switchTarget = chosenTarget === 21 ? 11 : 8;
+      document.getElementById('select-active-match').value = index;
+      render();
+    }
+
+    function resetGame() {
+      const currentMatch = teamMatches[activeMatchIndex];
+      Object.assign(currentMatch, { scoreA: 0, scoreB: 0, completed: false, winner: null });
+      recordRoomEvent('system', 'RESET GAME', `Reset Game ${activeMatchIndex + 1} to 0-0`);
+      loadMatch(activeMatchIndex);
+    }
+
+    function undo() {
+      if (!history.length) return;
+      state = history.pop();
+      const currentMatch = teamMatches[activeMatchIndex];
+      if (currentMatch.completed && !state.gameOver) {
+        currentMatch.completed = false;
+        currentMatch.winner = null;
+      }
+      recordRoomEvent('system', 'UNDO', `Reverted to ${state.scoreA}-${state.scoreB}`);
+      render();
+    }
+
+    ensureRoomLogUI();
+    document.getElementById('room-code-text').textContent = roomId;
+
+    function renderRoomQRCode() {
+      const box = document.getElementById('qr-code-box');
+      const label = document.getElementById('qr-url-label');
+      if (!box) return;
+      box.innerHTML = '';
+
+      const shareUrl = getDisplayShareUrl(roomId);
+      if (label) label.textContent = `Room ${roomId} — ${shareUrl}`;
+
+      if (typeof QRCode !== 'undefined') {
+        try {
+          new QRCode(box, { text: shareUrl, width: 160, height: 160 });
+          return;
+        } catch (e) {
+          console.warn('QRCode library failed, falling back to image:', e);
+        }
+      }
+
+      const img = document.createElement('img');
+      img.alt = `Display QR Code for Room ${roomId}`;
+      img.width = 160;
+      img.height = 160;
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(shareUrl)}`;
+      img.onerror = () => {
+        img.onerror = null;
+        img.src = `https://quickchart.io/qr?size=160&text=${encodeURIComponent(shareUrl)}`;
+      };
+      box.appendChild(img);
+    }
+
+    function applyViewMode(mode) {
+      viewMode = mode === 'display' ? 'display' : 'control';
+      const isDisplay = viewMode === 'display';
+      const wrapper = document.querySelector('.pickleball-app-wrapper');
+      wrapper.classList.toggle('display-mode', isDisplay);
+      document.getElementById('room-code-text').textContent = roomId;
+      document.getElementById('btn-switch-view').textContent = isDisplay ? 'Controller Mode' : 'Display Mode';
+      const matchSelect = document.getElementById('select-active-match');
+      const rulesSelect = document.getElementById('select-game-rules');
+      const teamAInput = document.getElementById('team-name-A');
+      const teamBInput = document.getElementById('team-name-B');
+      if (matchSelect) matchSelect.disabled = isDisplay;
+      if (rulesSelect) rulesSelect.disabled = isDisplay;
+      if (teamAInput) teamAInput.readOnly = isDisplay;
+      if (teamBInput) teamBInput.readOnly = isDisplay;
+      document.querySelectorAll('.player-input').forEach(el => { el.readOnly = isDisplay; });
+      if (isDisplay) requestLatestState();
+    }
+
+    function setSyncIndicator(isLive, labelText) {
+      const dot = document.getElementById('sync-dot');
+      const label = document.getElementById('sync-status-label');
+      if (dot) dot.classList.toggle('live', Boolean(isLive));
+      if (label) label.textContent = labelText;
+    }
+
+    function buildSnapshot() {
+      const { nameA, nameB } = getTeamNames();
+      return {
+        type: 'score_update',
+        roomId,
+        state: clone(),
+        teamMatches,
+        activeMatchIndex,
+        faultHistory,
+        matchEventLog: matchEventLog.slice(-100),
+        teamNameA: nameA,
+        teamNameB: nameB
+      };
+    }
+
+    function applyRemoteSnapshot(payload) {
+      if (!payload || String(payload.roomId || '').toUpperCase() !== roomId) return;
+      isApplyingRemoteState = true;
+      try {
+        if (payload.state) state = payload.state;
+        if (Array.isArray(payload.teamMatches)) teamMatches = payload.teamMatches;
+        if (typeof payload.activeMatchIndex === 'number') activeMatchIndex = payload.activeMatchIndex;
+        if (Array.isArray(payload.faultHistory)) faultHistory = payload.faultHistory;
+        if (Array.isArray(payload.matchEventLog)) matchEventLog = payload.matchEventLog;
+        if (typeof payload.teamNameA === 'string') document.getElementById('team-name-A').value = payload.teamNameA;
+        if (typeof payload.teamNameB === 'string') document.getElementById('team-name-B').value = payload.teamNameB;
+        render();
+      } finally {
+        isApplyingRemoteState = false;
+      }
+    }
+
+    function broadcastSnapshot() {
+      if (viewMode !== 'control' || isApplyingRemoteState) return;
+      const snap = buildSnapshot();
+      localChannel?.postMessage(snap);
+      realtimeChannel?.send({ type: 'broadcast', event: 'score_update', payload: snap });
+    }
+
+    function requestLatestState() {
+      if (viewMode !== 'display') return;
+      const req = { type: 'request_state', roomId };
+      localChannel?.postMessage(req);
+      realtimeChannel?.send({ type: 'broadcast', event: 'request_state', payload: req });
+    }
+
+    function initRealtimeSync() {
+      if (localChannel) {
+        localChannel.onmessage = (event) => {
+          const d = event.data;
+          if (!d || String(d.roomId || '').toUpperCase() !== roomId) return;
+          if (d.type === 'request_state' && viewMode === 'control') broadcastSnapshot();
+          else if (viewMode === 'display' && (!d.type || d.type === 'score_update')) applyRemoteSnapshot(d);
+        };
+      }
+
+      const hasSupabase =
+        typeof window.supabase !== 'undefined' &&
+        SUPABASE_CONFIG.url &&
+        !SUPABASE_CONFIG.url.includes('YOUR_SUPABASE_URL') &&
+        SUPABASE_CONFIG.anonKey &&
+        !SUPABASE_CONFIG.anonKey.includes('YOUR_SUPABASE_ANON_KEY');
+
+      if (!hasSupabase) {
+        setSyncIndicator(false, 'Local Tab Sync');
+        return;
+      }
+
+      const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+      realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
+        config: { broadcast: { self: false, ack: true } }
+      });
+
+      realtimeChannel
+        .on('broadcast', { event: 'score_update' }, ({ payload }) => {
+          if (viewMode === 'display') applyRemoteSnapshot(payload);
+        })
+        .on('broadcast', { event: 'request_state' }, ({ payload }) => {
+          if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) {
+            broadcastSnapshot();
+          }
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            setSyncIndicator(true, 'Live Cloud');
+            if (viewMode === 'control') {
+              broadcastSnapshot();
+            } else if (viewMode === 'display') {
+              requestLatestState();
+              setTimeout(requestLatestState, 400);
+            }
+          } else {
+            setSyncIndicator(false, status);
+          }
+        });
+    }
+
+    document.getElementById('btn-toggle-qr').addEventListener('click', () => {
+      const pop = document.getElementById('qr-popover');
+      const opening = pop.style.display === 'none';
+      pop.style.display = opening ? 'block' : 'none';
+      if (opening) renderRoomQRCode();
+    });
+
+    document.getElementById('btn-switch-view').addEventListener('click', () => {
+      applyViewMode(viewMode === 'display' ? 'control' : 'display');
+    });
+
+    document.getElementById('btn-fullscreen').addEventListener('click', async () => {
+      const wrapper = document.querySelector('.pickleball-app-wrapper');
+      try {
+        if (!document.fullscreenElement) await wrapper.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch (_) {
+        wrapper.classList.toggle('display-mode');
+      }
+    });
+
+    document.getElementById('btn-win-A').addEventListener('click', () => awardPoint(resolveSideTeam('left')));
+    document.getElementById('btn-win-B').addEventListener('click', () => awardPoint(resolveSideTeam('right')));
+    document.getElementById('btn-swap-court-ccw2').addEventListener('click', swapCourtPlayersCCW2);
+    document.getElementById('btn-undo').addEventListener('click', undo);
+    document.getElementById('btn-reset').addEventListener('click', resetGame);
+    document.getElementById('btn-fault-A').addEventListener('click', () => handleSideFault('left'));
+    document.getElementById('btn-fault-B').addEventListener('click', () => handleSideFault('right'));
+    document.getElementById('btn-handicap-left').addEventListener('click', () => applyHandicapPoint(resolveSideTeam('left')));
+    document.getElementById('btn-handicap-right').addEventListener('click', () => applyHandicapPoint(resolveSideTeam('right')));
+
+    document.getElementById('btn-fault-serve').addEventListener('click', () => {
+      if (state.gameOver) return;
+      const { nameA, nameB } = getTeamNames();
+      const msg = `${state.servingTeam === 'A' ? nameA : nameB} (${state.servingPlayer} (${getServerLabelOrdinal(state.serverNumber)})) - Serve Fault at ${state.scoreA}-${state.scoreB}`;
+      faultHistory.push(msg);
+      renderFaultLog();
+      recordRoomEvent('fault', 'SERVE FAULT', msg);
+      handleServerFaultOrLoss(true);
+    });
+
+    document.getElementById('select-game-rules').addEventListener('change', (e) => {
+      const nextTarget = parseInt(e.target.value, 10);
+      state.gameTarget = nextTarget;
+      state.switchTarget = nextTarget === 21 ? 11 : 8;
+      recordRoomEvent('system', 'RULE CHANGE', `Game target set to ${nextTarget} points`);
+      checkSwitchAndGameOver();
+      render();
+    });
+
+    document.getElementById('select-active-match').addEventListener('change', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      recordRoomEvent('system', 'SWITCH GAME', `Switched to Game ${idx + 1}`);
+      loadMatch(idx);
+    });
+
+    document.getElementById('team-name-A').addEventListener('input', render);
+    document.getElementById('team-name-B').addEventListener('input', render);
+
+    ['A', 'B'].forEach(team => {
+      document.getElementById(`toggle-serve-${team}`).addEventListener('click', () => {
+        applyServingTeamSelection(team);
+        render();
+      });
+    });
+
+    document.querySelectorAll('.player-input').forEach(input => {
+      input.addEventListener('focus', (e) => {
+        setTimeout(() => e.target.setSelectionRange(0, e.target.value.length), 10);
+      });
+      input.addEventListener('click', (e) => e.stopPropagation());
+      input.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase().slice(0, 3);
+        updateCourtNamesFromInputs();
+        updateServerBanner();
+        highlightServer();
+        updateStatus();
+        broadcastSnapshot();
+      });
+      input.addEventListener('change', (e) => {
+        e.target.value = e.target.value.toUpperCase().slice(0, 3);
+        updateCourtNamesFromInputs();
+        render();
+      });
+    });
+
+    document.querySelectorAll('.pickleball-app-wrapper .player-node').forEach(node => {
+      node.addEventListener('click', () => {
+        if (viewMode === 'display') return;
+        const team = node.id.includes('-A-') ? 'A' : (node.id.includes('-B-') ? 'B' : null);
+        if (!team) return;
+        applyServingTeamSelection(team);
+        render();
+      });
+    });
+
+    applyViewMode(viewMode);
+    initRealtimeSync();
+    loadMatch(0);
+  </script>
+</body>
+</html>
