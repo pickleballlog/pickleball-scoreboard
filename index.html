@@ -78,6 +78,7 @@
     }
     .pickleball-app-wrapper .sync-actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 6px;
     }
     .pickleball-app-wrapper .btn-mini {
@@ -397,6 +398,225 @@
       border: 1px solid #333;
     }
 
+    /* Addon #2: Per-Room Rally & Fault Match Log */
+    .pickleball-app-wrapper .room-event-log-card {
+      text-align: left;
+    }
+    .pickleball-app-wrapper .room-event-log-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .pickleball-app-wrapper .room-event-log-title {
+      font-weight: bold;
+      color: var(--accent-gold);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    .pickleball-app-wrapper .room-event-log-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pickleball-app-wrapper .room-event-log-list {
+      max-height: 190px;
+      overflow-y: auto;
+      background: #161616;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.78rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .pickleball-app-wrapper .log-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 6px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      background: #202020;
+      border-left: 3px solid #555;
+    }
+    .pickleball-app-wrapper .log-row.rally {
+      border-left-color: #4caf50;
+    }
+    .pickleball-app-wrapper .log-row.fault {
+      border-left-color: #ff9800;
+    }
+    .pickleball-app-wrapper .log-row.system {
+      border-left-color: #64b5f6;
+    }
+    .pickleball-app-wrapper .log-time {
+      color: var(--text-dim);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.72rem;
+    }
+    .pickleball-app-wrapper .log-score-pill {
+      background: #2d2d2d;
+      color: #fff;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.74rem;
+    }
+    .pickleball-app-wrapper .log-detail {
+      color: #e6e6e6;
+    }
+
+    /* Addon #1: Multi-Room Referee Dashboard */
+    .pickleball-app-wrapper .rooms-dashboard {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .pickleball-app-wrapper .dashboard-header {
+      background: var(--card-bg);
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .pickleball-app-wrapper .dashboard-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--accent-gold);
+    }
+    .pickleball-app-wrapper .dashboard-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .pickleball-app-wrapper .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 12px;
+    }
+    .pickleball-app-wrapper .room-card {
+      background: var(--card-bg);
+      border: 1px solid #383838;
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .pickleball-app-wrapper .room-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pickleball-app-wrapper .room-badge {
+      background: rgba(255, 179, 0, 0.16);
+      color: var(--accent-gold);
+      border: 1px solid var(--accent-gold);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.5px;
+    }
+    .pickleball-app-wrapper .room-meta-pill {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #2b2b2b;
+      color: #ddd;
+    }
+    .pickleball-app-wrapper .room-event-line {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+    .pickleball-app-wrapper .room-teams-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .pickleball-app-wrapper .room-score-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 8px 0;
+      background: #161616;
+      border-radius: 8px;
+      border: 1px solid #2c2c2c;
+    }
+    .pickleball-app-wrapper .room-score-a {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--team-a-score);
+    }
+    .pickleball-app-wrapper .room-score-sep {
+      font-size: 1.4rem;
+      color: #666;
+      font-weight: 800;
+    }
+    .pickleball-app-wrapper .room-score-b {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--team-b-score);
+    }
+    .pickleball-app-wrapper .room-server-line {
+      font-size: 0.78rem;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .pickleball-app-wrapper .room-card-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 2px;
+    }
+    .pickleball-app-wrapper .room-link-btn {
+      text-align: center;
+      text-decoration: none;
+      background: #2d2d2d;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .pickleball-app-wrapper .room-empty-state {
+      background: var(--card-bg);
+      border: 1px dashed #444;
+      border-radius: 10px;
+      padding: 28px 18px;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .pickleball-app-wrapper.dashboard-mode .container {
+      display: none !important;
+    }
+    .pickleball-app-wrapper.dashboard-mode .rooms-dashboard {
+      display: flex !important;
+    }
+    .pickleball-app-wrapper.dashboard-mode .sync-bar {
+      max-width: 960px;
+    }
+
     /* Display Mode: Show ONLY Room Indicator + Big Score + Game Rule + Court Diagram & Server Indicator */
     .pickleball-app-wrapper.display-mode {
       justify-content: center;
@@ -412,11 +632,13 @@
     .pickleball-app-wrapper.display-mode .fault-log,
     .pickleball-app-wrapper.display-mode .handicap-controls,
     .pickleball-app-wrapper.display-mode .match-summary-log-container,
+    .pickleball-app-wrapper.display-mode .room-event-log-card,
     .pickleball-app-wrapper.display-mode #initial-server-hud-row,
     .pickleball-app-wrapper.display-mode .sync-actions,
     .pickleball-app-wrapper.display-mode .banner-pill,
     .pickleball-app-wrapper.display-mode .banner-detail,
-    .pickleball-app-wrapper.display-mode .status-text {
+    .pickleball-app-wrapper.display-mode .status-text,
+    .pickleball-app-wrapper.display-mode .rooms-dashboard {
       display: none !important;
     }
     .pickleball-app-wrapper.display-mode .sync-bar {
@@ -477,6 +699,7 @@
         <span id="sync-status-label" class="sync-status">Local</span>
       </div>
       <div class="sync-actions">
+        <button type="button" id="btn-open-dashboard" class="btn-mini">All Rooms</button>
         <button type="button" id="btn-toggle-qr" class="btn-mini">QR Link</button>
         <button type="button" id="btn-switch-view" class="btn-mini">Display Mode</button>
         <button type="button" id="btn-fullscreen" class="btn-mini">Full Screen</button>
@@ -486,6 +709,20 @@
         <div id="qr-code-box"></div>
         <div id="qr-url-label" class="qr-url-label"></div>
       </div>
+    </div>
+
+    <div id="rooms-dashboard" class="rooms-dashboard" style="display: none;">
+      <div class="dashboard-header">
+        <div>
+          <div class="dashboard-title">Live Referee Rooms Dashboard</div>
+          <div id="dashboard-room-count" class="dashboard-subtitle">0 active rooms detected</div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" id="btn-dashboard-prune" class="btn-mini">Clear Idle (&gt;5m)</button>
+          <button type="button" id="btn-dashboard-back" class="btn-mini">Back to Court</button>
+        </div>
+      </div>
+      <div id="rooms-grid" class="rooms-grid"></div>
     </div>
 
     <div class="container">
@@ -580,6 +817,18 @@
       </div>
       <div class="fault-log" id="fault-log"></div>
 
+      <div class="hud room-event-log-card">
+        <div class="room-event-log-header">
+          <div class="room-event-log-title">Room <span id="log-room-badge">----</span> Rally &amp; Fault Log (<span id="room-log-count">0</span>)</div>
+          <div class="room-event-log-actions">
+            <button type="button" id="btn-export-csv" class="btn-mini">Export CSV</button>
+            <button type="button" id="btn-export-json" class="btn-mini">Export JSON</button>
+            <button type="button" id="btn-clear-room-log" class="btn-mini">Clear Log</button>
+          </div>
+        </div>
+        <div id="room-event-log-list" class="room-event-log-list"></div>
+      </div>
+
       <div class="hud match-summary-log-container" style="text-align: left;">
         <div style="font-weight: bold; color: var(--accent-gold); font-size: 0.9rem; margin-bottom: 6px; text-transform: uppercase;">Team Match Summary Log</div>
         <div id="match-summary-log" style="font-size: 0.8rem; color: #ddd; display: flex; flex-direction: column; gap: 4px;"></div>
@@ -596,10 +845,35 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = (urlParams.get('room') || Math.random().toString(36).substring(2, 6)).toUpperCase();
-    let viewMode = urlParams.get('view') === 'display' ? 'display' : 'control';
+    const rawView = urlParams.get('view');
+    let viewMode = rawView === 'display' ? 'display' : (rawView === 'dashboard' ? 'dashboard' : 'control');
     let isApplyingRemoteState = false;
     let realtimeChannel = null;
+    let lobbyChannel = null;
+    let heartbeatTimer = null;
+    const liveRoomsMap = new Map();
     const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`pb-room-${roomId}`) : null;
+    const lobbyLocalChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pb-rooms-lobby') : null;
+
+    // Addon #2: Per-Room Persistent Rally & Fault Event Log
+    const ROOM_LOG_STORAGE_KEY = `pb_match_log_${roomId}`;
+    let matchEventLog = loadStoredRoomLog();
+
+    function loadStoredRoomLog() {
+      try {
+        const raw = localStorage.getItem(ROOM_LOG_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveStoredRoomLog() {
+      try {
+        localStorage.setItem(ROOM_LOG_STORAGE_KEY, JSON.stringify(matchEventLog));
+      } catch (_) {}
+    }
 
     let history = [];
     let faultHistory = [];
@@ -626,6 +900,96 @@
       nameA: document.getElementById('team-name-A').value,
       nameB: document.getElementById('team-name-B').value
     });
+
+    function recordRoomEvent(category, actionType, detail) {
+      if (viewMode !== 'control' || isApplyingRemoteState) return;
+      const { nameA, nameB } = getNames();
+      const matchObj = teamMatches[activeMatchIndex] || {};
+      const now = new Date();
+      const entry = {
+        seq: matchEventLog.length + 1,
+        timestamp: now.toISOString(),
+        timeLabel: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        roomId,
+        gameNumber: activeMatchIndex + 1,
+        eventName: matchObj.name || `Game ${activeMatchIndex + 1}`,
+        category, // 'rally' | 'fault' | 'system'
+        actionType,
+        scoreA: state.scoreA,
+        scoreB: state.scoreB,
+        scoreLabel: `${state.scoreA}-${state.scoreB}`,
+        servingTeam: state.servingTeam === 'A' ? nameA : nameB,
+        servingPlayer: state.servingPlayer,
+        serverNumber: state.serverNumber,
+        detail
+      };
+      matchEventLog.push(entry);
+      saveStoredRoomLog();
+    }
+
+    function renderRoomEventLog() {
+      const badge = document.getElementById('log-room-badge');
+      const countEl = document.getElementById('room-log-count');
+      const listEl = document.getElementById('room-event-log-list');
+      if (badge) badge.textContent = roomId;
+      if (countEl) countEl.textContent = String(matchEventLog.length);
+      if (!listEl) return;
+
+      if (!matchEventLog.length) {
+        listEl.innerHTML = `<div style="color: var(--text-dim); padding: 4px;">No rallies or faults logged in Room ${roomId} yet.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = matchEventLog.slice(-50).map(item => `
+        <div class="log-row ${item.category || 'system'}">
+          <span class="log-time">#${item.seq} ${item.timeLabel}</span>
+          <span class="log-score-pill">${item.scoreLabel}</span>
+          <span class="log-detail"><b>[G${item.gameNumber} ${item.actionType}]</b> ${item.detail}</span>
+        </div>
+      `).join('');
+      listEl.scrollTop = listEl.scrollHeight;
+    }
+
+    function downloadFile(filename, content, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportRoomLogCsv() {
+      const headers = [
+        'seq', 'timestamp', 'room_id', 'game_number', 'event_name',
+        'category', 'action_type', 'score_a', 'score_b',
+        'serving_team', 'serving_player', 'server_number', 'detail'
+      ];
+      const escapeCsv = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+      const rows = matchEventLog.map(r => [
+        r.seq, r.timestamp, r.roomId, r.gameNumber, r.eventName,
+        r.category, r.actionType, r.scoreA, r.scoreB,
+        r.servingTeam, r.servingPlayer, r.serverNumber, r.detail
+      ].map(escapeCsv).join(','));
+      const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      downloadFile(`pickleball-room-${roomId}-log-${stamp}.csv`, csv, 'text/csv;charset=utf-8;');
+    }
+
+    function exportRoomLogJson() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        roomId,
+        totalEvents: matchEventLog.length,
+        teamMatches,
+        events: matchEventLog
+      };
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      downloadFile(`pickleball-room-${roomId}-log-${stamp}.json`, JSON.stringify(payload, null, 2), 'application/json');
+    }
 
     function getServerForTeam(team) {
       const odd = getTeamScore(team) % 2 === 1;
@@ -690,6 +1054,7 @@
         ? { A_left: rightTop, A_right: rightBottom, B_left: leftTop, B_right: leftBottom }
         : { B_left: rightTop, B_right: rightBottom, A_left: leftTop, A_right: leftBottom };
       remapServer(oldPos);
+      recordRoomEvent('system', 'COURT SWAP', 'Manual CCW court swap');
       render();
     }
 
@@ -788,6 +1153,8 @@
       faultEl.innerHTML = faultHistory.slice(-10).map(e => `<div>${e}</div>`).join('');
       faultEl.scrollTop = faultEl.scrollHeight;
 
+      renderRoomEventLog();
+
       let winsA = 0, winsB = 0;
       document.getElementById('match-summary-log').innerHTML = teamMatches.map((m, i) => {
         if (m.completed) {
@@ -810,26 +1177,34 @@
       if (!state.endsSwitchedAt8 && (state.scoreA >= state.switchTarget || state.scoreB >= state.switchTarget)) {
         state.endsSwitchedAt8 = true;
         state.switchBadgeDismissed = false;
+        recordRoomEvent('system', 'ENDS SWITCHED', `Reached ${state.switchTarget} pts switch mark`);
       }
       if ((state.scoreA >= state.gameTarget || state.scoreB >= state.gameTarget) && Math.abs(state.scoreA - state.scoreB) >= 2) {
         state.gameOver = true;
+        const { nameA, nameB } = getNames();
+        const winnerTeam = state.scoreA > state.scoreB ? 'A' : 'B';
         const m = teamMatches[activeMatchIndex];
         Object.assign(m, {
           completed: true,
           scoreA: state.scoreA,
           scoreB: state.scoreB,
-          winner: state.scoreA > state.scoreB ? 'A' : 'B'
+          winner: winnerTeam
         });
+        recordRoomEvent('system', 'GAME FINAL', `${winnerTeam === 'A' ? nameA : nameB} won ${state.scoreA}-${state.scoreB}`);
       }
     }
 
-    function awardPoint(winner) {
+    function awardPoint(winner, customDetail) {
       if (state.gameOver) return;
       history.push(clone());
+      const { nameA, nameB } = getNames();
+      const winName = winner === 'A' ? nameA : nameB;
+      const wasServing = winner === state.servingTeam;
+
       if (winner === 'A') state.scoreA++;
       else state.scoreB++;
       state.isOpeningServe = false;
-      if (winner === state.servingTeam) {
+      if (wasServing) {
         const kL = `${winner}_left`, kR = `${winner}_right`;
         [state.positions[kL], state.positions[kR]] = [state.positions[kR], state.positions[kL]];
       } else {
@@ -837,13 +1212,22 @@
         state.serverNumber = 1;
       }
       syncServer(winner);
+      const outcomeText = customDetail || (wasServing
+        ? `${winName} scored on serve (${state.servingPlayer}, ${ord(state.serverNumber)} server)`
+        : `${winName} won rally & side-out point (${state.servingPlayer}, 1st server)`);
+      recordRoomEvent('rally', 'WON RALLY', outcomeText);
       checkEnd();
       render();
     }
 
-    function serverLoss() {
+    function serverLoss(fromFault = false) {
       if (state.gameOver) return;
       history.push(clone());
+      const { nameA, nameB } = getNames();
+      const prevTeamName = state.servingTeam === 'A' ? nameA : nameB;
+      const prevPlayer = state.servingPlayer;
+      const prevNum = state.serverNumber;
+
       if (state.isOpeningServe) {
         state.isOpeningServe = false;
         state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A';
@@ -855,6 +1239,14 @@
         state.serverNumber = 1;
       }
       syncServer(state.servingTeam);
+      if (!fromFault) {
+        const nextTeamName = state.servingTeam === 'A' ? nameA : nameB;
+        recordRoomEvent(
+          'rally',
+          'SERVER CHANGE',
+          `${prevTeamName} (${prevPlayer}, ${ord(prevNum)}) lost serve → ${nextTeamName} (${state.servingPlayer}, ${ord(state.serverNumber)})`
+        );
+      }
       checkEnd();
       render();
     }
@@ -894,13 +1286,24 @@
     }
 
     // QR Link & Room Matching Sync
-    document.getElementById('room-code-text').textContent = roomId;
+    document.getElementById('room-code-text').textContent = viewMode === 'dashboard' ? 'ALL' : roomId;
 
-    function getDisplayShareUrl() {
-      const base = PUBLIC_APP_URL
+    function getBaseAppUrl() {
+      return PUBLIC_APP_URL
         ? PUBLIC_APP_URL.replace(/\/+$/, '') + '/'
         : window.location.href.split('?')[0];
-      return `${base}?view=display&room=${encodeURIComponent(roomId)}`;
+    }
+
+    function getDisplayShareUrl(targetRoomId = roomId) {
+      return `${getBaseAppUrl()}?view=display&room=${encodeURIComponent(targetRoomId)}`;
+    }
+
+    function getControlRoomUrl(targetRoomId = roomId) {
+      return `${getBaseAppUrl()}?room=${encodeURIComponent(targetRoomId)}`;
+    }
+
+    function getDashboardUrl() {
+      return `${getBaseAppUrl()}?view=dashboard`;
     }
 
     function renderRoomQRCode() {
@@ -908,7 +1311,7 @@
       const label = document.getElementById('qr-url-label');
       if (!box) return;
       box.innerHTML = '';
-      const url = getDisplayShareUrl();
+      const url = getDisplayShareUrl(roomId);
       if (label) label.textContent = `Room ${roomId} — ${url}`;
       if (typeof QRCode !== 'undefined') {
         try {
@@ -925,16 +1328,119 @@
     }
 
     function applyViewMode(mode) {
-      viewMode = mode === 'display' ? 'display' : 'control';
+      viewMode = mode === 'display' ? 'display' : (mode === 'dashboard' ? 'dashboard' : 'control');
       const isDisplay = viewMode === 'display';
-      document.querySelector('.pickleball-app-wrapper').classList.toggle('display-mode', isDisplay);
+      const isDashboard = viewMode === 'dashboard';
+      const wrapper = document.querySelector('.pickleball-app-wrapper');
+      wrapper.classList.toggle('display-mode', isDisplay);
+      wrapper.classList.toggle('dashboard-mode', isDashboard);
+      document.getElementById('room-code-text').textContent = isDashboard ? 'ALL' : roomId;
       document.getElementById('btn-switch-view').textContent = isDisplay ? 'Controller Mode' : 'Display Mode';
       document.getElementById('select-active-match').disabled = isDisplay;
       document.getElementById('select-game-rules').disabled = isDisplay;
       document.getElementById('team-name-A').readOnly = isDisplay;
       document.getElementById('team-name-B').readOnly = isDisplay;
       document.querySelectorAll('.player-input').forEach(el => { el.readOnly = isDisplay; });
+      if (isDashboard) renderRoomsDashboard();
       if (isDisplay) requestLatestState();
+    }
+
+    function buildRoomSummary() {
+      const { nameA, nameB } = getNames();
+      const matchObj = teamMatches[activeMatchIndex] || {};
+      return {
+        type: 'room_summary',
+        roomId,
+        scoreA: state.scoreA,
+        scoreB: state.scoreB,
+        servingTeam: state.servingTeam,
+        servingPlayer: state.servingPlayer,
+        serverNumber: state.serverNumber,
+        gameTarget: state.gameTarget,
+        gameOver: state.gameOver,
+        eventName: matchObj.name || `Game ${activeMatchIndex + 1}`,
+        nameA,
+        nameB,
+        logCount: matchEventLog.length,
+        updatedAt: Date.now()
+      };
+    }
+
+    function upsertRoomSummary(summary) {
+      if (!summary || !summary.roomId) return;
+      const code = String(summary.roomId).toUpperCase();
+      liveRoomsMap.set(code, {
+        ...summary,
+        roomId: code,
+        updatedAt: typeof summary.updatedAt === 'number' ? summary.updatedAt : Date.now()
+      });
+      if (viewMode === 'dashboard') renderRoomsDashboard();
+    }
+
+    function formatAge(ts) {
+      const sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+      if (sec < 5) return 'just now';
+      if (sec < 60) return `${sec}s ago`;
+      const min = Math.floor(sec / 60);
+      return `${min}m ago`;
+    }
+
+    function renderRoomsDashboard() {
+      const grid = document.getElementById('rooms-grid');
+      const countEl = document.getElementById('dashboard-room-count');
+      if (!grid || !countEl) return;
+
+      const rooms = Array.from(liveRoomsMap.values()).sort((a, b) => b.updatedAt - a.updatedAt);
+      countEl.textContent = `${rooms.length} room${rooms.length === 1 ? '' : 's'} reporting live`;
+
+      if (!rooms.length) {
+        grid.innerHTML = `<div class="room-empty-state">Waiting for active referee rooms to broadcast on <b>pickleball-rooms-lobby</b>...<br/>Open a controller room on GitHub Pages and tap a score or wait up to 10s for its heartbeat.</div>`;
+        return;
+      }
+
+      grid.innerHTML = rooms.map(r => {
+        const statusLabel = r.gameOver ? 'FINAL' : 'LIVE';
+        const servingLabel = r.gameOver
+          ? 'Match Complete'
+          : `${r.servingTeam === 'A' ? (r.nameA || 'Team A') : (r.nameB || 'Team B')} · ${r.servingPlayer || ''} (${ord(r.serverNumber || 1)})`;
+        return `
+          <div class="room-card">
+            <div class="room-card-top">
+              <span class="room-badge">Room: ${r.roomId}</span>
+              <span class="room-meta-pill">${statusLabel} · ${r.gameTarget || 15} pts</span>
+            </div>
+            <div class="room-event-line">${r.eventName || 'Match'} · ${formatAge(r.updatedAt)} · ${r.logCount ?? 0} logs</div>
+            <div class="room-teams-line">
+              <span style="color: var(--team-a-score);">${r.nameA || 'Team A'}</span>
+              <span style="color: var(--team-b-score);">${r.nameB || 'Team B'}</span>
+            </div>
+            <div class="room-score-row">
+              <span class="room-score-a">${r.scoreA ?? 0}</span>
+              <span class="room-score-sep">-</span>
+              <span class="room-score-b">${r.scoreB ?? 0}</span>
+            </div>
+            <div class="room-server-line">
+              <span>${servingLabel}</span>
+            </div>
+            <div class="room-card-actions">
+              <a class="room-link-btn" href="${getDisplayShareUrl(r.roomId)}" target="_blank" rel="noopener">Open Display</a>
+              <a class="room-link-btn" href="${getControlRoomUrl(r.roomId)}" target="_blank" rel="noopener">Open Control</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function broadcastLobbySummary() {
+      if (viewMode !== 'control' || isApplyingRemoteState) return;
+      const summary = buildRoomSummary();
+      upsertRoomSummary(summary);
+      lobbyLocalChannel?.postMessage(summary);
+      lobbyChannel?.send({
+        type: 'broadcast',
+        event: 'room_summary',
+        payload: summary
+      });
     }
 
     function buildSnapshot() {
@@ -946,6 +1452,7 @@
         teamMatches: JSON.parse(JSON.stringify(teamMatches)),
         activeMatchIndex,
         faultHistory: [...faultHistory],
+        matchEventLog: matchEventLog.slice(-100),
         teamNameA: nameA,
         teamNameB: nameB
       };
@@ -959,6 +1466,7 @@
         if (Array.isArray(payload.teamMatches)) teamMatches = payload.teamMatches;
         if (typeof payload.activeMatchIndex === 'number') activeMatchIndex = payload.activeMatchIndex;
         if (Array.isArray(payload.faultHistory)) faultHistory = payload.faultHistory;
+        if (Array.isArray(payload.matchEventLog)) matchEventLog = payload.matchEventLog;
         if (typeof payload.teamNameA === 'string') document.getElementById('team-name-A').value = payload.teamNameA;
         if (typeof payload.teamNameB === 'string') document.getElementById('team-name-B').value = payload.teamNameB;
         render();
@@ -976,6 +1484,7 @@
         event: 'score_update',
         payload: snap
       });
+      broadcastLobbySummary();
     }
 
     function requestLatestState() {
@@ -989,6 +1498,14 @@
       });
     }
 
+    function startRoomHeartbeat() {
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      heartbeatTimer = setInterval(() => {
+        if (viewMode === 'control') broadcastLobbySummary();
+        else if (viewMode === 'dashboard') renderRoomsDashboard();
+      }, 10000);
+    }
+
     function initRealtimeSync() {
       if (localChannel) {
         localChannel.onmessage = (e) => {
@@ -998,37 +1515,85 @@
           else if (viewMode === 'display' && d.type === 'score_update') applyRemoteSnapshot(d);
         };
       }
+      if (lobbyLocalChannel) {
+        lobbyLocalChannel.onmessage = (e) => {
+          const d = e.data;
+          if (d && d.type === 'room_summary') upsertRoomSummary(d);
+        };
+      }
       if (!window.supabase || !SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
         document.getElementById('sync-status-label').textContent = 'Local Tab Sync';
         return;
       }
       const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-      realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
-        config: { broadcast: { self: false, ack: true } }
+
+      lobbyChannel = client.channel('pickleball-rooms-lobby', {
+        config: { broadcast: { self: false } }
       });
-      realtimeChannel
-        .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-          if (viewMode === 'display') applyRemoteSnapshot(payload);
-        })
-        .on('broadcast', { event: 'request_state' }, ({ payload }) => {
-          if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) {
-            broadcastSnapshot();
-          }
+      lobbyChannel
+        .on('broadcast', { event: 'room_summary' }, ({ payload }) => {
+          upsertRoomSummary(payload);
         })
         .subscribe((status) => {
-          const live = status === 'SUBSCRIBED';
-          document.getElementById('sync-dot').classList.toggle('live', live);
-          document.getElementById('sync-status-label').textContent = live ? 'Live Cloud' : status;
-          if (!live) return;
-          if (viewMode === 'control') broadcastSnapshot();
-          else if (viewMode === 'display') {
-            requestLatestState();
-            setTimeout(requestLatestState, 400);
+          if (status === 'SUBSCRIBED' && viewMode === 'control') {
+            broadcastLobbySummary();
           }
         });
+
+      if (viewMode !== 'dashboard') {
+        realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
+          config: { broadcast: { self: false, ack: true } }
+        });
+        realtimeChannel
+          .on('broadcast', { event: 'score_update' }, ({ payload }) => {
+            if (viewMode === 'display') applyRemoteSnapshot(payload);
+          })
+          .on('broadcast', { event: 'request_state' }, ({ payload }) => {
+            if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) {
+              broadcastSnapshot();
+            }
+          })
+          .subscribe((status) => {
+            const live = status === 'SUBSCRIBED';
+            document.getElementById('sync-dot').classList.toggle('live', live);
+            document.getElementById('sync-status-label').textContent = live ? 'Live Cloud' : status;
+            if (!live) return;
+            if (viewMode === 'control') {
+              broadcastSnapshot();
+              broadcastLobbySummary();
+            } else if (viewMode === 'display') {
+              requestLatestState();
+              setTimeout(requestLatestState, 400);
+            }
+          });
+      } else {
+        document.getElementById('sync-dot').classList.add('live');
+        document.getElementById('sync-status-label').textContent = 'Live Lobby';
+      }
     }
 
     // Events
+    document.getElementById('btn-export-csv').addEventListener('click', exportRoomLogCsv);
+    document.getElementById('btn-export-json').addEventListener('click', exportRoomLogJson);
+    document.getElementById('btn-clear-room-log').addEventListener('click', () => {
+      matchEventLog = [];
+      saveStoredRoomLog();
+      renderRoomEventLog();
+      broadcastSnapshot();
+    });
+    document.getElementById('btn-open-dashboard').addEventListener('click', () => {
+      window.open(getDashboardUrl(), '_blank', 'noopener');
+    });
+    document.getElementById('btn-dashboard-back').addEventListener('click', () => {
+      applyViewMode('control');
+    });
+    document.getElementById('btn-dashboard-prune').addEventListener('click', () => {
+      const cutoff = Date.now() - 5 * 60 * 1000;
+      for (const [k, v] of liveRoomsMap.entries()) {
+        if ((v.updatedAt || 0) < cutoff) liveRoomsMap.delete(k);
+      }
+      renderRoomsDashboard();
+    });
     document.getElementById('btn-toggle-qr').addEventListener('click', () => {
       const pop = document.getElementById('qr-popover');
       const open = pop.style.display === 'none';
@@ -1058,10 +1623,12 @@
         m.completed = false;
         m.winner = null;
       }
+      recordRoomEvent('system', 'UNDO', `Reverted to ${state.scoreA}-${state.scoreB}`);
       render();
     });
     document.getElementById('btn-reset').addEventListener('click', () => {
       Object.assign(teamMatches[activeMatchIndex], { scoreA: 0, scoreB: 0, completed: false, winner: null });
+      recordRoomEvent('system', 'RESET GAME', `Reset Game ${activeMatchIndex + 1} to 0-0`);
       loadMatch(activeMatchIndex);
     });
     ['left', 'right'].forEach(side => {
@@ -1069,17 +1636,28 @@
         if (state.gameOver) return;
         const t = sideTeam(side);
         const { nameA, nameB } = getNames();
-        faultHistory.push(`${t === 'A' ? nameA : nameB} (${t === state.servingTeam ? `${state.servingPlayer} (${ord(state.serverNumber)})` : 'RECEIVER'}) - Foot Fault at ${state.scoreA}-${state.scoreB}`);
-        if (t === state.servingTeam) serverLoss();
-        else awardPoint(t === 'A' ? 'B' : 'A');
+        const offenderTeam = t === 'A' ? nameA : nameB;
+        const offenderRole = t === state.servingTeam ? `${state.servingPlayer} (${ord(state.serverNumber)})` : 'RECEIVER';
+        const msg = `${offenderTeam} (${offenderRole}) - Foot Fault at ${state.scoreA}-${state.scoreB}`;
+        faultHistory.push(msg);
+        recordRoomEvent('fault', 'FOOT FAULT', msg);
+        if (t === state.servingTeam) {
+          serverLoss(true);
+        } else {
+          const winnerTeam = t === 'A' ? 'B' : 'A';
+          const winnerName = winnerTeam === 'A' ? nameA : nameB;
+          awardPoint(winnerTeam, `${winnerName} awarded point from ${offenderTeam} Foot Fault`);
+        }
       });
       document.getElementById(`btn-handicap-${side}`).addEventListener('click', () => {
         if (state.gameOver) return;
         const t = sideTeam(side);
+        const { nameA, nameB } = getNames();
         history.push(clone());
         if (t === 'A') state.scoreA++;
         else state.scoreB++;
         syncServer(t);
+        recordRoomEvent('rally', 'HANDICAP +1', `+1 Handicap point awarded to ${t === 'A' ? nameA : nameB}`);
         checkEnd();
         render();
       });
@@ -1087,18 +1665,23 @@
     document.getElementById('btn-fault-serve').addEventListener('click', () => {
       if (state.gameOver) return;
       const { nameA, nameB } = getNames();
-      faultHistory.push(`${state.servingTeam === 'A' ? nameA : nameB} (${state.servingPlayer} (${ord(state.serverNumber)})) - Serve Fault at ${state.scoreA}-${state.scoreB}`);
-      serverLoss();
+      const msg = `${state.servingTeam === 'A' ? nameA : nameB} (${state.servingPlayer} (${ord(state.serverNumber)})) - Serve Fault at ${state.scoreA}-${state.scoreB}`;
+      faultHistory.push(msg);
+      recordRoomEvent('fault', 'SERVE FAULT', msg);
+      serverLoss(true);
     });
     document.getElementById('select-game-rules').addEventListener('change', (e) => {
       const t = parseInt(e.target.value, 10);
       state.gameTarget = t;
       state.switchTarget = t === 21 ? 11 : 8;
+      recordRoomEvent('system', 'RULE CHANGE', `Game target set to ${t} points`);
       checkEnd();
       render();
     });
     document.getElementById('select-active-match').addEventListener('change', (e) => {
-      loadMatch(parseInt(e.target.value, 10));
+      const nextIdx = parseInt(e.target.value, 10);
+      recordRoomEvent('system', 'SWITCH GAME', `Switched to Game ${nextIdx + 1}`);
+      loadMatch(nextIdx);
     });
     document.getElementById('team-name-A').addEventListener('input', render);
     document.getElementById('team-name-B').addEventListener('input', render);
@@ -1136,6 +1719,7 @@
 
     applyViewMode(viewMode);
     initRealtimeSync();
+    startRoomHeartbeat();
     loadMatch(0);
   </script>
 </body>
