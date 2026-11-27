@@ -29,122 +29,383 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
-    .pickleball-app-wrapper * { box-sizing: border-box; }
-    .pickleball-app-wrapper .container { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 12px; }
-
-    /* Sync & QR Bar */
-    .pickleball-app-wrapper .sync-bar {
-      width: 100%; max-width: 600px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-      gap: 8px; background: #1b1b1b; border: 1px solid #333; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px;
-      font-size: 0.8rem; position: relative;
+    .pickleball-app-wrapper * {
+      box-sizing: border-box;
     }
-    .pickleball-app-wrapper .sync-left { display: flex; align-items: center; gap: 8px; }
-    .pickleball-app-wrapper .sync-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-gold); display: inline-block; }
-    .pickleball-app-wrapper .sync-dot.live { background: #4caf50; }
-    .pickleball-app-wrapper .sync-status { color: var(--text-dim); font-size: 0.75rem; }
-    .pickleball-app-wrapper .sync-actions { display: flex; gap: 6px; }
+    .pickleball-app-wrapper .container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Room & Sync Bar */
+    .pickleball-app-wrapper .sync-bar {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #1b1b1b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+      position: relative;
+    }
+    .pickleball-app-wrapper .sync-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pickleball-app-wrapper .sync-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+      display: inline-block;
+    }
+    .pickleball-app-wrapper .sync-dot.live {
+      background: #4caf50;
+    }
+    .pickleball-app-wrapper .sync-status {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+    .pickleball-app-wrapper .sync-actions {
+      display: flex;
+      gap: 6px;
+    }
     .pickleball-app-wrapper .btn-mini {
-      background: #333; color: #fff; border: 1px solid #555; border-radius: 6px;
-      padding: 5px 9px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
     }
     .pickleball-app-wrapper .qr-popover {
-      position: absolute; top: 46px; right: 10px; background: #fff; color: #111; padding: 12px;
-      border-radius: 10px; box-shadow: 0 12px 28px rgba(0,0,0,0.7); z-index: 100; text-align: center; min-width: 184px;
+      position: absolute;
+      top: 46px;
+      right: 10px;
+      background: #ffffff;
+      color: #111111;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+      z-index: 100;
+      text-align: center;
+      min-width: 184px;
     }
-    .pickleball-app-wrapper .qr-title { font-size: 0.75rem; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; }
-    .pickleball-app-wrapper #qr-code-box { display: flex; justify-content: center; align-items: center; min-height: 160px; }
-    .pickleball-app-wrapper .qr-url-label { margin-top: 8px; font-size: 0.65rem; max-width: 170px; word-break: break-all; color: #444; }
+    .pickleball-app-wrapper .qr-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .pickleball-app-wrapper #qr-code-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 160px;
+    }
+    .pickleball-app-wrapper .qr-url-label {
+      margin-top: 8px;
+      font-size: 0.65rem;
+      max-width: 170px;
+      word-break: break-all;
+      color: #444;
+    }
 
-    /* HUD & Score */
+    /* HUD & Big Score */
     .pickleball-app-wrapper .hud {
-      background-color: var(--card-bg); border-radius: 10px; border: 1px solid #333;
-      padding: 16px 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      background-color: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid #333;
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     }
-    .pickleball-app-wrapper .server-banner { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .pickleball-app-wrapper .server-banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
     .pickleball-app-wrapper .banner-pill {
-      background: var(--accent-gold); color: #000; font-weight: 900; font-size: 0.85rem;
-      padding: 4px 12px; border-radius: 999px; letter-spacing: 0.5px;
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 900;
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
     }
     .pickleball-app-wrapper .banner-detail {
-      background: #2b2b2b; border: 1px solid #444; color: #fff; font-weight: 700;
-      font-size: 0.8rem; padding: 4px 10px; border-radius: 6px;
+      background: #2b2b2b;
+      border: 1px solid #444;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 6px;
     }
-    .pickleball-app-wrapper .status-text { font-size: 1rem; color: var(--text-dim); font-weight: bold; text-transform: uppercase; }
+    .pickleball-app-wrapper .status-text {
+      font-size: 1rem;
+      color: var(--text-dim);
+      font-weight: bold;
+      text-transform: uppercase;
+    }
     .pickleball-app-wrapper .score-callout {
-      font-size: 4rem; font-weight: 900; margin: 6px 0; display: flex;
-      justify-content: center; align-items: center; flex-wrap: wrap; gap: 14px;
+      font-size: 4rem;
+      font-weight: 900;
+      margin: 6px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
     }
-    .pickleball-app-wrapper .score-left, .pickleball-app-wrapper .score-right { font-size: 4rem; font-weight: 900; }
-    .pickleball-app-wrapper .score-divider { color: #555; font-size: 2.5rem; }
+    .pickleball-app-wrapper .score-left,
+    .pickleball-app-wrapper .score-right {
+      font-size: 4rem;
+      font-weight: 900;
+    }
+    .pickleball-app-wrapper .score-divider {
+      color: #555;
+      font-size: 2.5rem;
+    }
     .pickleball-app-wrapper .game-target-row {
-      width: 100%; margin-top: 8px; display: flex; justify-content: center; align-items: center;
-      gap: 6px; font-size: 0.85rem; color: var(--text-dim);
+      width: 100%;
+      margin-top: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
     }
 
     /* Court Diagram */
     .pickleball-app-wrapper .court {
-      background-color: var(--court-gray); border: 4px solid white; border-radius: 8px;
-      display: flex; flex-direction: row; aspect-ratio: 20 / 11; position: relative;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+      background-color: var(--court-gray);
+      border: 4px solid white;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: row;
+      aspect-ratio: 20 / 11;
+      position: relative;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
     }
-    .pickleball-app-wrapper .court-half { width: 50%; display: flex; flex-direction: row; position: relative; }
-    .pickleball-app-wrapper .left-half { flex-direction: row-reverse; }
-    .pickleball-app-wrapper .right-half { flex-direction: row; }
+    .pickleball-app-wrapper .court-half {
+      width: 50%;
+      display: flex;
+      flex-direction: row;
+      position: relative;
+    }
+    .pickleball-app-wrapper .left-half {
+      flex-direction: row-reverse;
+    }
+    .pickleball-app-wrapper .right-half {
+      flex-direction: row;
+    }
     .pickleball-app-wrapper .baseline-label {
-      position: absolute; top: 6px; left: 50%; transform: translateX(-50%); font-size: 1rem; font-weight: 900;
-      color: #ffeb3b; text-shadow: 0 0 6px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6);
-      padding: 4px 12px; border-radius: 14px; letter-spacing: 1px; z-index: 15; white-space: nowrap;
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+      font-weight: 900;
+      color: #ffeb3b;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 4px 12px;
+      border-radius: 14px;
+      letter-spacing: 1px;
+      z-index: 15;
+      white-space: nowrap;
     }
     .pickleball-app-wrapper .kitchen {
-      width: 18%; background-color: var(--kitchen-blue); display: flex; align-items: center; justify-content: center;
-      font-weight: bold; font-size: 0.7rem; text-transform: uppercase; color: rgba(255,255,255,0.8);
-      writing-mode: vertical-lr; transform: rotate(180deg);
+      width: 18%;
+      background-color: var(--kitchen-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.8);
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
     }
-    .pickleball-app-wrapper .left-half .kitchen { border-left: 3px solid white; }
-    .pickleball-app-wrapper .right-half .kitchen { border-right: 3px solid white; }
-    .pickleball-app-wrapper .baselines { flex: 1; display: flex; flex-direction: column; }
+    .pickleball-app-wrapper .left-half .kitchen {
+      border-left: 3px solid white;
+    }
+    .pickleball-app-wrapper .right-half .kitchen {
+      border-right: 3px solid white;
+    }
+    .pickleball-app-wrapper .baselines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
     .pickleball-app-wrapper .quadrant {
-      flex: 1; display: flex; align-items: center; justify-content: center; position: relative;
-      border-bottom: 2px dashed rgba(255,255,255,0.5);
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.5);
     }
-    .pickleball-app-wrapper .quadrant:last-child { border-bottom: none; }
-    .pickleball-app-wrapper .net { width: 6px; background-color: #111; height: 100%; position: absolute; left: 50%; transform: translateX(-50%); z-index: 10; }
+    .pickleball-app-wrapper .quadrant:last-child {
+      border-bottom: none;
+    }
+    .pickleball-app-wrapper .net {
+      width: 6px;
+      background-color: #111;
+      height: 100%;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+    }
     .pickleball-app-wrapper .player-node {
-      position: relative; background: rgba(0,0,0,0.8); padding: 6px 10px; border-radius: 20px;
-      border: 2px solid transparent; text-align: center; width: 80%; display: flex; flex-direction: column; align-items: center;
+      position: relative;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 6px 10px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      text-align: center;
+      width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .pickleball-app-wrapper .player-input {
-      background: transparent; border: none; border-bottom: 1px solid #777; color: #fff;
-      width: 80%; text-align: center; text-transform: uppercase; font-size: 0.9rem;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #777;
+      color: #fff;
+      width: 80%;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 0.9rem;
     }
-    .pickleball-app-wrapper .player-input:focus { outline: none; border-bottom-color: var(--accent-gold); }
-    .pickleball-app-wrapper .left-half .player-node { border-color: rgba(76,175,80,0.4); }
-    .pickleball-app-wrapper .right-half .player-node { border-color: rgba(255,20,147,0.3); }
-    .pickleball-app-wrapper .player-node.serving { border-color: var(--accent-gold) !important; box-shadow: 0 0 12px var(--accent-gold); }
+    .pickleball-app-wrapper .player-input:focus {
+      outline: none;
+      border-bottom-color: var(--accent-gold);
+    }
+    .pickleball-app-wrapper .left-half .player-node {
+      border-color: rgba(76, 175, 80, 0.4);
+    }
+    .pickleball-app-wrapper .right-half .player-node {
+      border-color: rgba(255, 20, 147, 0.3);
+    }
+    .pickleball-app-wrapper .player-node.serving {
+      border-color: var(--accent-gold) !important;
+      box-shadow: 0 0 12px var(--accent-gold);
+    }
     .pickleball-app-wrapper .player-node.serving::before {
-      content: "SERVING"; position: absolute; top: -10px; background: var(--accent-gold); color: #000;
-      font-size: 0.6rem; font-weight: 900; padding: 1px 6px; border-radius: 4px; letter-spacing: 0.5px;
+      content: "SERVING";
+      position: absolute;
+      top: -10px;
+      background: var(--accent-gold);
+      color: #000;
+      font-size: 0.6rem;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
     }
-    .pickleball-app-wrapper .server-indicator { color: var(--accent-gold); font-size: 0.65rem; font-weight: 700; display: block; margin-top: 2px; text-transform: uppercase; }
+    .pickleball-app-wrapper .server-indicator {
+      color: var(--accent-gold);
+      font-size: 0.65rem;
+      font-weight: 700;
+      display: block;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
 
-    /* Controller Controls */
-    .pickleball-app-wrapper .controls { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .pickleball-app-wrapper .btn { padding: 16px; font-size: 1.05rem; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: white; }
-    .pickleball-app-wrapper .btn:active { opacity: 0.8; }
-    .pickleball-app-wrapper .btn-teamA { background-color: var(--team-a-score); }
-    .pickleball-app-wrapper .btn-teamB { background-color: var(--team-b-score); }
-    .pickleball-app-wrapper .btn-utility { background-color: var(--btn-gray); grid-column: span 2; padding: 12px; font-size: 0.95rem; }
-    .pickleball-app-wrapper .fault-controls { margin-top: 8px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .pickleball-app-wrapper .btn-fault { padding: 10px; font-size: 0.85rem; color: white; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; }
-    .pickleball-app-wrapper #btn-fault-serve { background-color: var(--accent-gold); color: #000; }
+    /* Referee Controls & Logs (Hidden on Display Mode) */
+    .pickleball-app-wrapper .controls {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .pickleball-app-wrapper .btn {
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: white;
+    }
+    .pickleball-app-wrapper .btn:active {
+      opacity: 0.8;
+    }
+    .pickleball-app-wrapper .btn-teamA {
+      background-color: var(--team-a-score);
+    }
+    .pickleball-app-wrapper .btn-teamB {
+      background-color: var(--team-b-score);
+    }
+    .pickleball-app-wrapper .btn-utility {
+      background-color: var(--btn-gray);
+      grid-column: span 2;
+      padding: 12px;
+      font-size: 0.95rem;
+    }
+    .pickleball-app-wrapper .fault-controls {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .pickleball-app-wrapper .btn-fault {
+      padding: 10px;
+      font-size: 0.85rem;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .pickleball-app-wrapper #btn-fault-serve {
+      background-color: var(--accent-gold);
+      color: #000;
+    }
     .pickleball-app-wrapper .fault-log {
-      margin-top: 8px; font-size: 0.8rem; color: var(--text-dim); max-height: 80px; overflow-y: auto;
-      text-align: left; padding: 6px 8px; border-radius: 6px; background: #1b1b1b; border: 1px solid #333;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      max-height: 80px;
+      overflow-y: auto;
+      text-align: left;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: #1b1b1b;
+      border: 1px solid #333;
     }
 
-    /* TV Display Mode: Only Room Indicator + Big Score + Game Rule + Court Diagram & Server Indicator */
-    .pickleball-app-wrapper.display-mode { justify-content: center; padding: 24px; }
-    .pickleball-app-wrapper.display-mode .container { max-width: 840px; gap: 16px; }
+    /* Display Mode: Show ONLY Room Indicator + Big Score + Game Rule + Court Diagram & Server Indicator */
+    .pickleball-app-wrapper.display-mode {
+      justify-content: center;
+      padding: 24px;
+    }
+    .pickleball-app-wrapper.display-mode .container {
+      max-width: 840px;
+      gap: 16px;
+    }
     .pickleball-app-wrapper.display-mode .event-header,
     .pickleball-app-wrapper.display-mode .controls,
     .pickleball-app-wrapper.display-mode .fault-controls,
@@ -153,19 +414,58 @@
     .pickleball-app-wrapper.display-mode .match-summary-log-container,
     .pickleball-app-wrapper.display-mode #initial-server-hud-row,
     .pickleball-app-wrapper.display-mode .sync-actions,
-    .pickleball-app-wrapper.display-mode .banner-detail { display: none !important; }
-    .pickleball-app-wrapper.display-mode .sync-bar { max-width: 840px; margin-bottom: 0; padding: 10px 16px; font-size: 0.95rem; }
-    .pickleball-app-wrapper.display-mode #room-code-text { color: var(--accent-gold); font-size: 1.05rem; letter-spacing: 1px; }
-    .pickleball-app-wrapper.display-mode .score-hud { padding: 26px 20px; }
+    .pickleball-app-wrapper.display-mode .banner-pill,
+    .pickleball-app-wrapper.display-mode .banner-detail,
+    .pickleball-app-wrapper.display-mode .status-text {
+      display: none !important;
+    }
+    .pickleball-app-wrapper.display-mode .sync-bar {
+      max-width: 840px;
+      margin-bottom: 0;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+    }
+    .pickleball-app-wrapper.display-mode #room-code-text {
+      color: var(--accent-gold);
+      font-size: 1.05rem;
+      letter-spacing: 1px;
+    }
+    .pickleball-app-wrapper.display-mode .score-hud {
+      padding: 26px 20px;
+    }
     .pickleball-app-wrapper.display-mode .score-callout,
     .pickleball-app-wrapper.display-mode .score-left,
-    .pickleball-app-wrapper.display-mode .score-right { font-size: 5.75rem; }
-    .pickleball-app-wrapper.display-mode .score-divider { font-size: 3.75rem; }
-    .pickleball-app-wrapper.display-mode .game-target-row { display: flex !important; font-size: 1rem; margin-top: 10px; }
-    .pickleball-app-wrapper.display-mode #select-game-rules { pointer-events: none; appearance: none; -webkit-appearance: none; font-size: 0.95rem; font-weight: 700; }
-    .pickleball-app-wrapper.display-mode .court { display: flex !important; }
-    .pickleball-app-wrapper.display-mode .player-input { pointer-events: none; border-bottom-color: transparent; font-size: 1.15rem; font-weight: 800; }
-    .pickleball-app-wrapper.display-mode .server-indicator { font-size: 0.8rem; font-weight: 800; }
+    .pickleball-app-wrapper.display-mode .score-right {
+      font-size: 5.75rem;
+    }
+    .pickleball-app-wrapper.display-mode .score-divider {
+      font-size: 3.75rem;
+    }
+    .pickleball-app-wrapper.display-mode .game-target-row {
+      display: flex !important;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    .pickleball-app-wrapper.display-mode #select-game-rules {
+      pointer-events: none;
+      appearance: none;
+      -webkit-appearance: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .pickleball-app-wrapper.display-mode .court {
+      display: flex !important;
+    }
+    .pickleball-app-wrapper.display-mode .player-input {
+      pointer-events: none;
+      border-bottom-color: transparent;
+      font-size: 1.15rem;
+      font-weight: 800;
+    }
+    .pickleball-app-wrapper.display-mode .server-indicator {
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
   </style>
 </head>
 <body>
@@ -296,7 +596,7 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = (urlParams.get('room') || Math.random().toString(36).substring(2, 6)).toUpperCase();
-    let viewMode = urlParams.get('view') || 'control';
+    let viewMode = urlParams.get('view') === 'display' ? 'display' : 'control';
     let isApplyingRemoteState = false;
     let realtimeChannel = null;
     const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`pb-room-${roomId}`) : null;
@@ -322,11 +622,16 @@
     const getTeamScore = (t) => (t === 'A' ? state.scoreA : state.scoreB);
     const isCourtSwitched = () => state.endsSwitchedAt8 !== (state.manualSwap || false);
     const ord = (n) => (n === 1 ? '1st' : '2nd');
-    const getNames = () => ({ nameA: document.getElementById('team-name-A').value, nameB: document.getElementById('team-name-B').value });
+    const getNames = () => ({
+      nameA: document.getElementById('team-name-A').value,
+      nameB: document.getElementById('team-name-B').value
+    });
 
     function getServerForTeam(team) {
       const odd = getTeamScore(team) % 2 === 1;
-      return team === 'A' ? (odd ? state.positions.A_left : state.positions.A_right) : (odd ? state.positions.B_left : state.positions.B_right);
+      return team === 'A'
+        ? (odd ? state.positions.A_left : state.positions.A_right)
+        : (odd ? state.positions.B_left : state.positions.B_right);
     }
 
     function syncServer(team = state.servingTeam) {
@@ -344,12 +649,24 @@
 
     function readInputs() {
       const v = (id, fb) => ((document.getElementById(id).value || '').toUpperCase().slice(0, 3)) || fb;
-      return { leftTop: v('input-A-left', 'A1'), leftBottom: v('input-A-right', 'A2'), rightTop: v('input-B-left', 'B2'), rightBottom: v('input-B-right', 'B1') };
+      return {
+        leftTop: v('input-A-left', 'A1'),
+        leftBottom: v('input-A-right', 'A2'),
+        rightTop: v('input-B-left', 'B2'),
+        rightBottom: v('input-B-right', 'B1')
+      };
     }
 
     function remapServer(oldPos) {
-      const map = { [oldPos.A_left]: state.positions.A_left, [oldPos.A_right]: state.positions.A_right, [oldPos.B_right]: state.positions.B_right, [oldPos.B_left]: state.positions.B_left };
-      state.servingPlayer = Object.prototype.hasOwnProperty.call(map, state.servingPlayer) ? map[state.servingPlayer] : getServerForTeam(state.servingTeam);
+      const map = {
+        [oldPos.A_left]: state.positions.A_left,
+        [oldPos.A_right]: state.positions.A_right,
+        [oldPos.B_right]: state.positions.B_right,
+        [oldPos.B_left]: state.positions.B_left
+      };
+      state.servingPlayer = Object.prototype.hasOwnProperty.call(map, state.servingPlayer)
+        ? map[state.servingPlayer]
+        : getServerForTeam(state.servingTeam);
       const m = teamMatches[activeMatchIndex];
       m.teamAPlayers = [state.positions.A_left, state.positions.A_right];
       m.teamBPlayers = [state.positions.B_right, state.positions.B_left];
@@ -381,7 +698,9 @@
         n.classList.remove('serving');
         n.querySelector('.server-indicator')?.remove();
       });
-      if (!Object.values(state.positions).includes(state.servingPlayer)) state.servingPlayer = getServerForTeam(state.servingTeam);
+      if (!Object.values(state.positions).includes(state.servingPlayer)) {
+        state.servingPlayer = getServerForTeam(state.servingTeam);
+      }
       const sw = isCourtSwitched();
       const pos = (t, s) => state.positions[`${t}_${s}`] === state.servingPlayer;
       const id = state.servingTeam === 'A'
@@ -429,7 +748,9 @@
       if (!document.activeElement?.classList.contains('player-input')) {
         const { A_left, A_right, B_left, B_right } = state.positions;
         const vals = !isCourtSwitched() ? [A_left, A_right, B_left, B_right] : [B_left, B_right, A_left, A_right];
-        ['input-A-left', 'input-A-right', 'input-B-left', 'input-B-right'].forEach((id, i) => { document.getElementById(id).value = vals[i]; });
+        ['input-A-left', 'input-A-right', 'input-B-left', 'input-B-right'].forEach((id, i) => {
+          document.getElementById(id).value = vals[i];
+        });
       }
       updateHud();
       highlightServer();
@@ -439,8 +760,10 @@
       document.getElementById('baseline-label-left').textContent = !sw ? nameA : nameB;
       document.getElementById('baseline-label-right').textContent = !sw ? nameB : nameA;
 
-      const leftName = !sw ? nameA : nameB, rightName = !sw ? nameB : nameA;
-      const leftCol = !sw ? 'var(--team-a-score)' : 'var(--team-b-score)', rightCol = !sw ? 'var(--team-b-score)' : 'var(--team-a-score)';
+      const leftName = !sw ? nameA : nameB;
+      const rightName = !sw ? nameB : nameA;
+      const leftCol = !sw ? 'var(--team-a-score)' : 'var(--team-b-score)';
+      const rightCol = !sw ? 'var(--team-b-score)' : 'var(--team-a-score)';
       document.getElementById('btn-win-A').textContent = `${leftName} Won Rally`;
       document.getElementById('btn-win-A').style.backgroundColor = leftCol;
       document.getElementById('btn-win-B').textContent = `${rightName} Won Rally`;
@@ -467,7 +790,10 @@
 
       let winsA = 0, winsB = 0;
       document.getElementById('match-summary-log').innerHTML = teamMatches.map((m, i) => {
-        if (m.completed) { if (m.winner === 'A') winsA++; else winsB++; }
+        if (m.completed) {
+          if (m.winner === 'A') winsA++;
+          else winsB++;
+        }
         const active = i === activeMatchIndex;
         const st = m.completed
           ? `<b style="color:${m.winner === 'A' ? 'var(--team-a-score)' : 'var(--team-b-score)'}">${m.winner === 'A' ? nameA : nameB} Won (${m.scoreA}-${m.scoreB})</b>`
@@ -482,36 +808,55 @@
 
     function checkEnd() {
       if (!state.endsSwitchedAt8 && (state.scoreA >= state.switchTarget || state.scoreB >= state.switchTarget)) {
-        state.endsSwitchedAt8 = true; state.switchBadgeDismissed = false;
+        state.endsSwitchedAt8 = true;
+        state.switchBadgeDismissed = false;
       }
       if ((state.scoreA >= state.gameTarget || state.scoreB >= state.gameTarget) && Math.abs(state.scoreA - state.scoreB) >= 2) {
         state.gameOver = true;
         const m = teamMatches[activeMatchIndex];
-        Object.assign(m, { completed: true, scoreA: state.scoreA, scoreB: state.scoreB, winner: state.scoreA > state.scoreB ? 'A' : 'B' });
+        Object.assign(m, {
+          completed: true,
+          scoreA: state.scoreA,
+          scoreB: state.scoreB,
+          winner: state.scoreA > state.scoreB ? 'A' : 'B'
+        });
       }
     }
 
     function awardPoint(winner) {
       if (state.gameOver) return;
       history.push(clone());
-      if (winner === 'A') state.scoreA++; else state.scoreB++;
+      if (winner === 'A') state.scoreA++;
+      else state.scoreB++;
       state.isOpeningServe = false;
       if (winner === state.servingTeam) {
         const kL = `${winner}_left`, kR = `${winner}_right`;
         [state.positions[kL], state.positions[kR]] = [state.positions[kR], state.positions[kL]];
       } else {
-        state.servingTeam = winner; state.serverNumber = 1;
+        state.servingTeam = winner;
+        state.serverNumber = 1;
       }
-      syncServer(winner); checkEnd(); render();
+      syncServer(winner);
+      checkEnd();
+      render();
     }
 
     function serverLoss() {
       if (state.gameOver) return;
       history.push(clone());
-      if (state.isOpeningServe) { state.isOpeningServe = false; state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A'; state.serverNumber = 1; }
-      else if (state.serverNumber === 1) state.serverNumber = 2;
-      else { state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A'; state.serverNumber = 1; }
-      syncServer(state.servingTeam); checkEnd(); render();
+      if (state.isOpeningServe) {
+        state.isOpeningServe = false;
+        state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A';
+        state.serverNumber = 1;
+      } else if (state.serverNumber === 1) {
+        state.serverNumber = 2;
+      } else {
+        state.servingTeam = state.servingTeam === 'A' ? 'B' : 'A';
+        state.serverNumber = 1;
+      }
+      syncServer(state.servingTeam);
+      checkEnd();
+      render();
     }
 
     const sideTeam = (side) => (side === 'left' ? (!isCourtSwitched() ? 'A' : 'B') : (!isCourtSwitched() ? 'B' : 'A'));
@@ -519,25 +864,42 @@
     function loadMatch(idx) {
       activeMatchIndex = idx;
       const m = teamMatches[idx];
-      history = []; faultHistory = [];
+      history = [];
+      faultHistory = [];
       state = {
         ...state,
-        positions: { A_left: m.teamAPlayers[0], A_right: m.teamAPlayers[1], B_right: m.teamBPlayers[0], B_left: m.teamBPlayers[1] },
-        scoreA: m.scoreA || 0, scoreB: m.scoreB || 0, gameOver: m.completed || false,
-        servingTeam: 'A', serverNumber: 1, isOpeningServe: true, servingPlayer: m.teamAPlayers[1], servingSide: 'even',
-        endsSwitchedAt8: false, manualSwap: false, switchBadgeDismissed: false
+        positions: {
+          A_left: m.teamAPlayers[0],
+          A_right: m.teamAPlayers[1],
+          B_right: m.teamBPlayers[0],
+          B_left: m.teamBPlayers[1]
+        },
+        scoreA: m.scoreA || 0,
+        scoreB: m.scoreB || 0,
+        gameOver: m.completed || false,
+        servingTeam: 'A',
+        serverNumber: 1,
+        isOpeningServe: true,
+        servingPlayer: m.teamAPlayers[1],
+        servingSide: 'even',
+        endsSwitchedAt8: false,
+        manualSwap: false,
+        switchBadgeDismissed: false
       };
       const t = parseInt(document.getElementById('select-game-rules').value, 10) || 15;
-      state.gameTarget = t; state.switchTarget = t === 21 ? 11 : 8;
+      state.gameTarget = t;
+      state.switchTarget = t === 21 ? 11 : 8;
       document.getElementById('select-active-match').value = idx;
       render();
     }
 
-    // QR Link & Room Sync
+    // QR Link & Room Matching Sync
     document.getElementById('room-code-text').textContent = roomId;
 
     function getDisplayShareUrl() {
-      const base = PUBLIC_APP_URL ? PUBLIC_APP_URL.replace(/\/+$/, '') + '/' : window.location.href.split('?')[0];
+      const base = PUBLIC_APP_URL
+        ? PUBLIC_APP_URL.replace(/\/+$/, '') + '/'
+        : window.location.href.split('?')[0];
       return `${base}?view=display&room=${encodeURIComponent(roomId)}`;
     }
 
@@ -549,18 +911,22 @@
       const url = getDisplayShareUrl();
       if (label) label.textContent = `Room ${roomId} — ${url}`;
       if (typeof QRCode !== 'undefined') {
-        try { new QRCode(box, { text: url, width: 160, height: 160 }); return; } catch (_) {}
+        try {
+          new QRCode(box, { text: url, width: 160, height: 160 });
+          return;
+        } catch (_) {}
       }
       const img = document.createElement('img');
       img.alt = `Display QR for Room ${roomId}`;
-      img.width = 160; img.height = 160;
+      img.width = 160;
+      img.height = 160;
       img.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(url)}`;
       box.appendChild(img);
     }
 
     function applyViewMode(mode) {
-      viewMode = mode;
-      const isDisplay = mode === 'display';
+      viewMode = mode === 'display' ? 'display' : 'control';
+      const isDisplay = viewMode === 'display';
       document.querySelector('.pickleball-app-wrapper').classList.toggle('display-mode', isDisplay);
       document.getElementById('btn-switch-view').textContent = isDisplay ? 'Controller Mode' : 'Display Mode';
       document.getElementById('select-active-match').disabled = isDisplay;
@@ -568,45 +934,97 @@
       document.getElementById('team-name-A').readOnly = isDisplay;
       document.getElementById('team-name-B').readOnly = isDisplay;
       document.querySelectorAll('.player-input').forEach(el => { el.readOnly = isDisplay; });
+      if (isDisplay) requestLatestState();
     }
 
     function buildSnapshot() {
       const { nameA, nameB } = getNames();
-      return { roomId, state: clone(), teamMatches, activeMatchIndex, faultHistory, teamNameA: nameA, teamNameB: nameB };
+      return {
+        type: 'score_update',
+        roomId,
+        state: clone(),
+        teamMatches: JSON.parse(JSON.stringify(teamMatches)),
+        activeMatchIndex,
+        faultHistory: [...faultHistory],
+        teamNameA: nameA,
+        teamNameB: nameB
+      };
     }
 
     function applyRemoteSnapshot(payload) {
       if (!payload || String(payload.roomId || '').toUpperCase() !== roomId) return;
       isApplyingRemoteState = true;
-      ({ state, teamMatches, activeMatchIndex, faultHistory } = payload);
-      document.getElementById('team-name-A').value = payload.teamNameA;
-      document.getElementById('team-name-B').value = payload.teamNameB;
-      render();
-      isApplyingRemoteState = false;
+      try {
+        if (payload.state) state = payload.state;
+        if (Array.isArray(payload.teamMatches)) teamMatches = payload.teamMatches;
+        if (typeof payload.activeMatchIndex === 'number') activeMatchIndex = payload.activeMatchIndex;
+        if (Array.isArray(payload.faultHistory)) faultHistory = payload.faultHistory;
+        if (typeof payload.teamNameA === 'string') document.getElementById('team-name-A').value = payload.teamNameA;
+        if (typeof payload.teamNameB === 'string') document.getElementById('team-name-B').value = payload.teamNameB;
+        render();
+      } finally {
+        isApplyingRemoteState = false;
+      }
     }
 
     function broadcastSnapshot() {
       if (viewMode !== 'control' || isApplyingRemoteState) return;
       const snap = buildSnapshot();
       localChannel?.postMessage(snap);
-      realtimeChannel?.send({ type: 'broadcast', event: 'score_update', payload: snap });
+      realtimeChannel?.send({
+        type: 'broadcast',
+        event: 'score_update',
+        payload: snap
+      });
+    }
+
+    function requestLatestState() {
+      if (viewMode !== 'display') return;
+      const req = { type: 'request_state', roomId };
+      localChannel?.postMessage(req);
+      realtimeChannel?.send({
+        type: 'broadcast',
+        event: 'request_state',
+        payload: req
+      });
     }
 
     function initRealtimeSync() {
-      if (localChannel) localChannel.onmessage = (e) => { if (viewMode === 'display') applyRemoteSnapshot(e.data); };
+      if (localChannel) {
+        localChannel.onmessage = (e) => {
+          const d = e.data;
+          if (!d || String(d.roomId || '').toUpperCase() !== roomId) return;
+          if (d.type === 'request_state' && viewMode === 'control') broadcastSnapshot();
+          else if (viewMode === 'display' && d.type === 'score_update') applyRemoteSnapshot(d);
+        };
+      }
       if (!window.supabase || !SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
         document.getElementById('sync-status-label').textContent = 'Local Tab Sync';
         return;
       }
       const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-      realtimeChannel = client.channel(`pickleball-room-${roomId}`, { config: { broadcast: { self: false } } });
+      realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
+        config: { broadcast: { self: false, ack: true } }
+      });
       realtimeChannel
-        .on('broadcast', { event: 'score_update' }, ({ payload }) => { if (viewMode === 'display') applyRemoteSnapshot(payload); })
+        .on('broadcast', { event: 'score_update' }, ({ payload }) => {
+          if (viewMode === 'display') applyRemoteSnapshot(payload);
+        })
+        .on('broadcast', { event: 'request_state' }, ({ payload }) => {
+          if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) {
+            broadcastSnapshot();
+          }
+        })
         .subscribe((status) => {
           const live = status === 'SUBSCRIBED';
           document.getElementById('sync-dot').classList.toggle('live', live);
           document.getElementById('sync-status-label').textContent = live ? 'Live Cloud' : status;
-          if (live && viewMode === 'control') broadcastSnapshot();
+          if (!live) return;
+          if (viewMode === 'control') broadcastSnapshot();
+          else if (viewMode === 'display') {
+            requestLatestState();
+            setTimeout(requestLatestState, 400);
+          }
         });
     }
 
@@ -617,10 +1035,17 @@
       pop.style.display = open ? 'block' : 'none';
       if (open) renderRoomQRCode();
     });
-    document.getElementById('btn-switch-view').addEventListener('click', () => applyViewMode(viewMode === 'display' ? 'control' : 'display'));
+    document.getElementById('btn-switch-view').addEventListener('click', () => {
+      applyViewMode(viewMode === 'display' ? 'control' : 'display');
+    });
     document.getElementById('btn-fullscreen').addEventListener('click', async () => {
       const w = document.querySelector('.pickleball-app-wrapper');
-      try { if (!document.fullscreenElement) await w.requestFullscreen(); else await document.exitFullscreen(); } catch (_) { w.classList.toggle('display-mode'); }
+      try {
+        if (!document.fullscreenElement) await w.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch (_) {
+        w.classList.toggle('display-mode');
+      }
     });
     document.getElementById('btn-win-A').addEventListener('click', () => awardPoint(sideTeam('left')));
     document.getElementById('btn-win-B').addEventListener('click', () => awardPoint(sideTeam('right')));
@@ -629,7 +1054,10 @@
       if (!history.length) return;
       state = history.pop();
       const m = teamMatches[activeMatchIndex];
-      if (m.completed && !state.gameOver) { m.completed = false; m.winner = null; }
+      if (m.completed && !state.gameOver) {
+        m.completed = false;
+        m.winner = null;
+      }
       render();
     });
     document.getElementById('btn-reset').addEventListener('click', () => {
@@ -642,14 +1070,18 @@
         const t = sideTeam(side);
         const { nameA, nameB } = getNames();
         faultHistory.push(`${t === 'A' ? nameA : nameB} (${t === state.servingTeam ? `${state.servingPlayer} (${ord(state.serverNumber)})` : 'RECEIVER'}) - Foot Fault at ${state.scoreA}-${state.scoreB}`);
-        if (t === state.servingTeam) serverLoss(); else awardPoint(t === 'A' ? 'B' : 'A');
+        if (t === state.servingTeam) serverLoss();
+        else awardPoint(t === 'A' ? 'B' : 'A');
       });
       document.getElementById(`btn-handicap-${side}`).addEventListener('click', () => {
         if (state.gameOver) return;
         const t = sideTeam(side);
         history.push(clone());
-        if (t === 'A') state.scoreA++; else state.scoreB++;
-        syncServer(t); checkEnd(); render();
+        if (t === 'A') state.scoreA++;
+        else state.scoreB++;
+        syncServer(t);
+        checkEnd();
+        render();
       });
     });
     document.getElementById('btn-fault-serve').addEventListener('click', () => {
@@ -660,23 +1092,45 @@
     });
     document.getElementById('select-game-rules').addEventListener('change', (e) => {
       const t = parseInt(e.target.value, 10);
-      state.gameTarget = t; state.switchTarget = t === 21 ? 11 : 8;
-      checkEnd(); render();
+      state.gameTarget = t;
+      state.switchTarget = t === 21 ? 11 : 8;
+      checkEnd();
+      render();
     });
-    document.getElementById('select-active-match').addEventListener('change', (e) => loadMatch(parseInt(e.target.value, 10)));
+    document.getElementById('select-active-match').addEventListener('change', (e) => {
+      loadMatch(parseInt(e.target.value, 10));
+    });
     document.getElementById('team-name-A').addEventListener('input', render);
     document.getElementById('team-name-B').addEventListener('input', render);
-    ['A', 'B'].forEach(t => document.getElementById(`toggle-serve-${t}`).addEventListener('click', () => { setStartingServer(t); render(); }));
+    ['A', 'B'].forEach(t => {
+      document.getElementById(`toggle-serve-${t}`).addEventListener('click', () => {
+        setStartingServer(t);
+        render();
+      });
+    });
     document.querySelectorAll('.player-input').forEach(inp => {
       inp.addEventListener('click', (e) => e.stopPropagation());
-      inp.addEventListener('input', (e) => { e.target.value = e.target.value.toUpperCase().slice(0, 3); updateCourtNames(); updateHud(); highlightServer(); broadcastSnapshot(); });
-      inp.addEventListener('change', (e) => { e.target.value = e.target.value.toUpperCase().slice(0, 3); updateCourtNames(); render(); });
+      inp.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase().slice(0, 3);
+        updateCourtNames();
+        updateHud();
+        highlightServer();
+        broadcastSnapshot();
+      });
+      inp.addEventListener('change', (e) => {
+        e.target.value = e.target.value.toUpperCase().slice(0, 3);
+        updateCourtNames();
+        render();
+      });
     });
     document.querySelectorAll('.pickleball-app-wrapper .player-node').forEach(node => {
       node.addEventListener('click', () => {
         if (viewMode === 'display') return;
         const t = node.id.includes('-A-') ? 'A' : (node.id.includes('-B-') ? 'B' : null);
-        if (t) { setStartingServer(t); render(); }
+        if (t) {
+          setStartingServer(t);
+          render();
+        }
       });
     });
 
