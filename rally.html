@@ -472,7 +472,7 @@
       font-size: 0.8rem;
     }
 
-    /* Display Mode */
+    /* Display Mode (triggered automatically via ?view=display&room=XXXX from QR code) */
     .pickleball-app-wrapper.display-mode {
       justify-content: center;
       padding: 20px;
@@ -584,8 +584,6 @@
       </div>
       <div class="sync-actions">
         <button type="button" id="btn-toggle-qr" class="btn-mini">QR Link</button>
-        <button type="button" id="btn-switch-view" class="btn-mini">Display Mode</button>
-        <button type="button" id="btn-fullscreen" class="btn-mini">Full Screen</button>
       </div>
       <div id="qr-popover" class="qr-popover" style="display: none;">
         <div class="qr-title">Scan for Big-Screen Display</div>
@@ -709,7 +707,7 @@
   </div>
 
   <script>
-    const PUBLIC_APP_URL = 'https://pickleballlog.github.io/pickleball-scoreboard/';
+    const PUBLIC_APP_URL = 'https://pickleballlog.github.io/pickleball-scoreboard/rally.html';
     const SUPABASE_CONFIG = {
       url: 'https://bfdqwreulrfsulvdrlzk.supabase.co',
       anonKey: 'sb_publishable_Vo2M8B6ptaLBPbtGK557aw_vTXFoqoF'
@@ -1194,14 +1192,10 @@
       listEl.scrollTop = listEl.scrollHeight;
     }
 
-    function getBaseAppUrl() {
-      return PUBLIC_APP_URL
-        ? PUBLIC_APP_URL.replace(/\/+$/, '') + '/'
-        : window.location.href.split('?')[0];
-    }
-
     function getDisplayShareUrl(targetRoomId = roomId) {
-      return `${getBaseAppUrl()}?view=display&room=${encodeURIComponent(targetRoomId)}`;
+      const base = PUBLIC_APP_URL || window.location.href.split('?')[0];
+      const sep = base.includes('?') ? '&' : '?';
+      return `${base}${sep}view=display&room=${encodeURIComponent(targetRoomId)}`;
     }
 
     function render() {
@@ -1444,7 +1438,6 @@
       const wrapper = document.querySelector('.pickleball-app-wrapper');
       wrapper.classList.toggle('display-mode', isDisplay);
       document.getElementById('room-code-text').textContent = roomId;
-      document.getElementById('btn-switch-view').textContent = isDisplay ? 'Controller Mode' : 'Display Mode';
       const matchSelect = document.getElementById('select-active-match');
       const rulesSelect = document.getElementById('select-game-rules');
       const teamAInput = document.getElementById('team-name-A');
@@ -1567,20 +1560,6 @@
       const opening = pop.style.display === 'none';
       pop.style.display = opening ? 'block' : 'none';
       if (opening) renderRoomQRCode();
-    });
-
-    document.getElementById('btn-switch-view').addEventListener('click', () => {
-      applyViewMode(viewMode === 'display' ? 'control' : 'display');
-    });
-
-    document.getElementById('btn-fullscreen').addEventListener('click', async () => {
-      const wrapper = document.querySelector('.pickleball-app-wrapper');
-      try {
-        if (!document.fullscreenElement) await wrapper.requestFullscreen();
-        else await document.exitFullscreen();
-      } catch (_) {
-        wrapper.classList.toggle('display-mode');
-      }
     });
 
     document.getElementById('btn-win-A').addEventListener('click', () => awardPoint(resolveSideTeam('left')));
