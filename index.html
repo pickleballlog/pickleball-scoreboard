@@ -717,15 +717,10 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = (urlParams.get('room') || Math.random().toString(36).substring(2, 6)).toUpperCase();
-    const rawView = urlParams.get('view');
-    let viewMode = rawView === 'display' ? 'display' : (rawView === 'dashboard' ? 'dashboard' : 'control');
+    let viewMode = urlParams.get('view') === 'display' ? 'display' : 'control';
     let isApplyingRemoteState = false;
     let realtimeChannel = null;
-    let lobbyChannel = null;
-    let heartbeatTimer = null;
-    const liveRoomsMap = new Map();
     const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`pb-room-${roomId}`) : null;
-    const lobbyLocalChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pb-rooms-lobby') : null;
 
     let history = [];
     let faultHistory = [];
@@ -1205,163 +1200,8 @@
         : window.location.href.split('?')[0];
     }
 
-    function getShareUrl(view, targetRoomId = roomId) {
-      return `${getBaseAppUrl()}?view=${view}&room=${encodeURIComponent(targetRoomId)}`;
-    }
-
     function getDisplayShareUrl(targetRoomId = roomId) {
-      return getShareUrl('display', targetRoomId);
-    }
-
-    function getControllerShareUrl(targetRoomId = roomId) {
-      return `${getBaseAppUrl()}?room=${encodeURIComponent(targetRoomId)}`;
-    }
-
-    function getDashboardUrl() {
-      return `${getBaseAppUrl()}?view=dashboard`;
-    }
-
-    function ensureDashboardUI() {
-      const wrapper = document.querySelector('.pickleball-app-wrapper');
-      const syncBar = document.getElementById('sync-bar');
-      if (!wrapper || !syncBar || document.getElementById('rooms-dashboard')) return;
-
-      const actions = document.querySelector('.pickleball-app-wrapper .sync-actions');
-      if (actions && !document.getElementById('btn-open-dashboard')) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.id = 'btn-open-dashboard';
-        btn.className = 'btn-mini';
-        btn.textContent = 'All Rooms';
-        btn.addEventListener('click', () => {
-          window.open(getDashboardUrl(), '_blank', 'noopener');
-        });
-        actions.prepend(btn);
-      }
-
-      const dash = document.createElement('div');
-      dash.id = 'rooms-dashboard';
-      dash.className = 'rooms-dashboard';
-      dash.style.cssText = 'display:none; width:100%; max-width:960px; flex-direction:column; gap:14px;';
-      dash.innerHTML = `
-        <div style="background:var(--card-bg); border:1px solid #333; border-radius:10px; padding:14px 16px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">
-          <div>
-            <div style="font-size:1.05rem; font-weight:800; color:var(--accent-gold);">Live Referee Rooms Dashboard</div>
-            <div id="dashboard-room-count" style="font-size:0.8rem; color:var(--text-dim); margin-top:2px;">0 active rooms detected</div>
-          </div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button type="button" id="btn-dashboard-prune" class="btn-mini">Clear Idle (&gt;5m)</button>
-            <button type="button" id="btn-dashboard-back" class="btn-mini">Back to Court</button>
-          </div>
-        </div>
-        <div id="rooms-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); gap:12px;"></div>
-      `;
-      syncBar.insertAdjacentElement('afterend', dash);
-
-      document.getElementById('btn-dashboard-back').addEventListener('click', () => applyViewMode('control'));
-      document.getElementById('btn-dashboard-prune').addEventListener('click', () => {
-        const cutoff = Date.now() - 5 * 60 * 1000;
-        for (const [k, v] of liveRoomsMap.entries()) {
-          if ((v.updatedAt || 0) < cutoff) liveRoomsMap.delete(k);
-        }
-        renderRoomsDashboard();
-      });
-    }
-
-    function buildRoomSummary() {
-      const { nameA, nameB } = getTeamNames();
-      const matchObj = teamMatches[activeMatchIndex] || {};
-      return {
-        type: 'room_summary',
-        roomId,
-        scoreA: state.scoreA,
-        scoreB: state.scoreB,
-        servingTeam: state.servingTeam,
-        servingPlayer: state.servingPlayer,
-        serverNumber: state.serverNumber,
-        gameTarget: state.gameTarget,
-        gameOver: state.gameOver,
-        eventName: matchObj.name || `Game ${activeMatchIndex + 1}`,
-        nameA,
-        nameB,
-        logCount: matchEventLog.length,
-        updatedAt: Date.now()
-      };
-    }
-
-    function upsertRoomSummary(summary) {
-      if (!summary || !summary.roomId) return;
-      const code = String(summary.roomId).toUpperCase();
-      liveRoomsMap.set(code, {
-        ...summary,
-        roomId: code,
-        updatedAt: typeof summary.updatedAt === 'number' ? summary.updatedAt : Date.now()
-      });
-      if (viewMode === 'dashboard') renderRoomsDashboard();
-    }
-
-    function formatAge(ts) {
-      const sec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
-      if (sec < 5) return 'just now';
-      if (sec < 60) return `${sec}s ago`;
-      const min = Math.floor(sec / 60);
-      return `${min}m ago`;
-    }
-
-    function renderRoomsDashboard() {
-      const grid = document.getElementById('rooms-grid');
-      const countEl = document.getElementById('dashboard-room-count');
-      if (!grid || !countEl) return;
-
-      const rooms = Array.from(liveRoomsMap.values()).sort((a, b) => b.updatedAt - a.updatedAt);
-      countEl.textContent = `${rooms.length} room${rooms.length === 1 ? '' : 's'} reporting live`;
-
-      if (!rooms.length) {
-        grid.innerHTML = `<div style="background:var(--card-bg); border:1px dashed #444; border-radius:10px; padding:28px 18px; text-align:center; color:var(--text-dim); font-size:0.9rem;">Waiting for active referee rooms to broadcast on <b>pickleball-rooms-lobby</b>...<br/>Open a controller room on GitHub Pages and tap a score or wait up to 10s for its heartbeat.</div>`;
-        return;
-      }
-
-      grid.innerHTML = rooms.map(r => {
-        const statusLabel = r.gameOver ? 'FINAL' : 'LIVE';
-        const servingLabel = r.gameOver
-          ? 'Match Complete'
-          : `${r.servingTeam === 'A' ? (r.nameA || 'Team A') : (r.nameB || 'Team B')} · ${r.servingPlayer || ''} (${getServerLabelOrdinal(r.serverNumber || 1)})`;
-        return `
-          <div style="background:var(--card-bg); border:1px solid #383838; border-radius:10px; padding:14px; display:flex; flex-direction:column; gap:10px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-              <span style="background:rgba(255,179,0,0.16); color:var(--accent-gold); border:1px solid var(--accent-gold); border-radius:6px; padding:3px 8px; font-weight:800; font-size:0.85rem; letter-spacing:0.5px;">Room: ${r.roomId}</span>
-              <span style="font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:999px; background:#2b2b2b; color:#ddd;">${statusLabel} · ${r.gameTarget || 15} pts</span>
-            </div>
-            <div style="font-size:0.8rem; color:var(--text-dim); font-weight:700;">${r.eventName || 'Match'} · ${formatAge(r.updatedAt)} · ${r.logCount ?? 0} logs</div>
-            <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700;">
-              <span style="color:var(--team-a-score);">${r.nameA || 'Team A'}</span>
-              <span style="color:var(--team-b-score);">${r.nameB || 'Team B'}</span>
-            </div>
-            <div style="display:flex; align-items:center; justify-content:center; gap:12px; padding:8px 0; background:#161616; border-radius:8px; border:1px solid #2c2c2c;">
-              <span style="font-size:2.2rem; font-weight:900; color:var(--team-a-score);">${r.scoreA ?? 0}</span>
-              <span style="font-size:1.4rem; color:#666; font-weight:800;">-</span>
-              <span style="font-size:2.2rem; font-weight:900; color:var(--team-b-score);">${r.scoreB ?? 0}</span>
-            </div>
-            <div style="font-size:0.78rem; color:#e0e0e0;">${servingLabel}</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:2px;">
-              <a style="text-align:center; text-decoration:none; background:#2d2d2d; color:#fff; border:1px solid #555; border-radius:6px; padding:6px 8px; font-size:0.75rem; font-weight:700;" href="${getDisplayShareUrl(r.roomId)}" target="_blank" rel="noopener">Open Display</a>
-              <a style="text-align:center; text-decoration:none; background:#2d2d2d; color:#fff; border:1px solid #555; border-radius:6px; padding:6px 8px; font-size:0.75rem; font-weight:700;" href="${getControllerShareUrl(r.roomId)}" target="_blank" rel="noopener">Open Control</a>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function broadcastLobbySummary() {
-      if (viewMode !== 'control' || isApplyingRemoteState) return;
-      const summary = buildRoomSummary();
-      upsertRoomSummary(summary);
-      lobbyLocalChannel?.postMessage(summary);
-      lobbyChannel?.send({
-        type: 'broadcast',
-        event: 'room_summary',
-        payload: summary
-      });
+      return `${getBaseAppUrl()}?view=display&room=${encodeURIComponent(targetRoomId)}`;
     }
 
     function render() {
@@ -1565,9 +1405,8 @@
       render();
     }
 
-    ensureDashboardUI();
     ensureRoomLogUI();
-    document.getElementById('room-code-text').textContent = viewMode === 'dashboard' ? 'ALL' : roomId;
+    document.getElementById('room-code-text').textContent = roomId;
 
     function renderRoomQRCode() {
       const box = document.getElementById('qr-code-box');
@@ -1600,16 +1439,11 @@
     }
 
     function applyViewMode(mode) {
-      viewMode = mode === 'display' ? 'display' : (mode === 'dashboard' ? 'dashboard' : 'control');
+      viewMode = mode === 'display' ? 'display' : 'control';
       const isDisplay = viewMode === 'display';
-      const isDashboard = viewMode === 'dashboard';
       const wrapper = document.querySelector('.pickleball-app-wrapper');
-      const container = document.querySelector('.pickleball-app-wrapper .container');
-      const dash = document.getElementById('rooms-dashboard');
       wrapper.classList.toggle('display-mode', isDisplay);
-      if (container) container.style.display = isDashboard ? 'none' : '';
-      if (dash) dash.style.display = isDashboard ? 'flex' : 'none';
-      document.getElementById('room-code-text').textContent = isDashboard ? 'ALL' : roomId;
+      document.getElementById('room-code-text').textContent = roomId;
       document.getElementById('btn-switch-view').textContent = isDisplay ? 'Controller Mode' : 'Display Mode';
       const matchSelect = document.getElementById('select-active-match');
       const rulesSelect = document.getElementById('select-game-rules');
@@ -1620,7 +1454,6 @@
       if (teamAInput) teamAInput.readOnly = isDisplay;
       if (teamBInput) teamBInput.readOnly = isDisplay;
       document.querySelectorAll('.player-input').forEach(el => { el.readOnly = isDisplay; });
-      if (isDashboard) renderRoomsDashboard();
       if (isDisplay) requestLatestState();
     }
 
@@ -1668,7 +1501,6 @@
       const snap = buildSnapshot();
       localChannel?.postMessage(snap);
       realtimeChannel?.send({ type: 'broadcast', event: 'score_update', payload: snap });
-      broadcastLobbySummary();
     }
 
     function requestLatestState() {
@@ -1678,14 +1510,6 @@
       realtimeChannel?.send({ type: 'broadcast', event: 'request_state', payload: req });
     }
 
-    function startRoomHeartbeat() {
-      if (heartbeatTimer) clearInterval(heartbeatTimer);
-      heartbeatTimer = setInterval(() => {
-        if (viewMode === 'control') broadcastLobbySummary();
-        else if (viewMode === 'dashboard') renderRoomsDashboard();
-      }, 10000);
-    }
-
     function initRealtimeSync() {
       if (localChannel) {
         localChannel.onmessage = (event) => {
@@ -1693,12 +1517,6 @@
           if (!d || String(d.roomId || '').toUpperCase() !== roomId) return;
           if (d.type === 'request_state' && viewMode === 'control') broadcastSnapshot();
           else if (viewMode === 'display' && (!d.type || d.type === 'score_update')) applyRemoteSnapshot(d);
-        };
-      }
-      if (lobbyLocalChannel) {
-        lobbyLocalChannel.onmessage = (event) => {
-          const d = event.data;
-          if (d && d.type === 'room_summary') upsertRoomSummary(d);
         };
       }
 
@@ -1716,50 +1534,32 @@
 
       const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 
-      lobbyChannel = client.channel('pickleball-rooms-lobby', {
-        config: { broadcast: { self: false } }
+      realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
+        config: { broadcast: { self: false, ack: true } }
       });
-      lobbyChannel
-        .on('broadcast', { event: 'room_summary' }, ({ payload }) => {
-          upsertRoomSummary(payload);
+
+      realtimeChannel
+        .on('broadcast', { event: 'score_update' }, ({ payload }) => {
+          if (viewMode === 'display') applyRemoteSnapshot(payload);
+        })
+        .on('broadcast', { event: 'request_state' }, ({ payload }) => {
+          if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) {
+            broadcastSnapshot();
+          }
         })
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED' && viewMode === 'control') {
-            broadcastLobbySummary();
+          if (status === 'SUBSCRIBED') {
+            setSyncIndicator(true, 'Live Cloud');
+            if (viewMode === 'control') {
+              broadcastSnapshot();
+            } else if (viewMode === 'display') {
+              requestLatestState();
+              setTimeout(requestLatestState, 400);
+            }
+          } else {
+            setSyncIndicator(false, status);
           }
         });
-
-      if (viewMode !== 'dashboard') {
-        realtimeChannel = client.channel(`pickleball-room-${roomId}`, {
-          config: { broadcast: { self: false, ack: true } }
-        });
-
-        realtimeChannel
-          .on('broadcast', { event: 'score_update' }, ({ payload }) => {
-            if (viewMode === 'display') applyRemoteSnapshot(payload);
-          })
-          .on('broadcast', { event: 'request_state' }, ({ payload }) => {
-            if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) {
-              broadcastSnapshot();
-            }
-          })
-          .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-              setSyncIndicator(true, 'Live Cloud');
-              if (viewMode === 'control') {
-                broadcastSnapshot();
-                broadcastLobbySummary();
-              } else if (viewMode === 'display') {
-                requestLatestState();
-                setTimeout(requestLatestState, 400);
-              }
-            } else {
-              setSyncIndicator(false, status);
-            }
-          });
-      } else {
-        setSyncIndicator(true, 'Live Lobby');
-      }
     }
 
     document.getElementById('btn-toggle-qr').addEventListener('click', () => {
@@ -1860,7 +1660,6 @@
 
     applyViewMode(viewMode);
     initRealtimeSync();
-    startRoomHeartbeat();
     loadMatch(0);
   </script>
 </body>
