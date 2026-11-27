@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pickleball Live Sync &amp; Display</title>
+  <title>Pickleball 100-Point Relay (Court Switch Notice)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -28,6 +28,7 @@
       min-height: 100vh;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
+      position: relative;
     }
 
     .pickleball-app-wrapper * { box-sizing: border-box; }
@@ -301,6 +302,76 @@
     .pickleball-app-wrapper .game-target-row { margin-top: 6px; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-dim); }
     .pickleball-app-wrapper .rules-badge { background: #333; padding: 2px 8px; border-radius: 4px; color: #fff; font-size: 0.8rem; }
 
+    /* Court Switch Pop-Up Notice */
+    .pickleball-app-wrapper .court-switch-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 16px;
+    }
+
+    .pickleball-app-wrapper .court-switch-modal.open {
+      display: flex;
+    }
+
+    .pickleball-app-wrapper .court-switch-card {
+      background: #1f1f1f;
+      border: 2px solid var(--accent-gold);
+      border-radius: 14px;
+      padding: 20px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .pickleball-app-wrapper .court-switch-badge {
+      display: inline-block;
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 900;
+      font-size: 1.15rem;
+      padding: 6px 16px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .pickleball-app-wrapper .court-switch-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .pickleball-app-wrapper .court-switch-lineup {
+      background: #141414;
+      border: 1px solid #383838;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: #f5f5f5;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .pickleball-app-wrapper .court-switch-btn {
+      background: var(--accent-gold);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 900;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* Display Mode */
     .pickleball-app-wrapper.display-mode { justify-content: center; padding: 20px; }
     .pickleball-app-wrapper.display-mode .container { max-width: 860px; gap: 14px; }
     .pickleball-app-wrapper.display-mode .event-header,
@@ -444,10 +515,19 @@
         <div id="match-summary-log" style="font-size: 0.8rem; color: #ddd; display: flex; flex-direction: column; gap: 4px;"></div>
       </div>
     </div>
+
+    <div id="court-switch-modal" class="court-switch-modal" role="dialog" aria-modal="true" aria-labelledby="court-switch-title">
+      <div class="court-switch-card">
+        <div class="court-switch-badge">COURT SWITCH</div>
+        <div id="court-switch-title" class="court-switch-title">Players Rotated</div>
+        <div id="court-switch-lineup" class="court-switch-lineup"></div>
+        <button type="button" id="btn-dismiss-court-switch" class="court-switch-btn">OK — Edit / Continue</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    const PUBLIC_APP_URL = 'https://pickleballlog.github.io/pickleball-scoreboard/';
+    const PUBLIC_APP_URL = 'https://pickleballlog.github.io/pickleball-scoreboard/relay.html';
     const SUPABASE_CONFIG = {
       url: 'https://bfdqwreulrfsulvdrlzk.supabase.co',
       anonKey: 'sb_publishable_Vo2M8B6ptaLBPbtGK557aw_vTXFoqoF'
@@ -466,7 +546,7 @@
     let viewMode = urlParams.get('view') === 'display' ? 'display' : 'control';
     let isApplyingRemoteState = false;
     let realtimeChannel = null;
-    const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`pb-room-${roomId}`) : null;
+    const localChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`pb-relay-${roomId}`) : null;
 
     let history = [];
     let faultHistory = [];
@@ -484,7 +564,6 @@
       scoreA: 0,
       scoreB: 0,
       gameTarget: 100,
-      switchTarget: 8,
       gameOver: false,
       servingTeam: 'A',
       serverNumber: 1,
@@ -492,13 +571,11 @@
       servingPlayer: 'W2',
       servingSide: 'even',
       positions: { A_left: 'W1', A_right: 'W2', B_left: 'W4', B_right: 'W3' },
-      endsSwitchedAt8: false,
-      manualSwap: false,
-      switchBadgeDismissed: false
+      manualSwap: false
     };
 
     const clone = (obj) => JSON.parse(JSON.stringify(obj));
-    const isCourtSwitched = () => state.endsSwitchedAt8 !== (state.manualSwap || false);
+    const isCourtSwitched = () => Boolean(state.manualSwap);
     const ord = (n) => (n === 1 ? '1st' : '2nd');
     const getTeamNames = () => ({
       nameA: document.getElementById('team-name-A').value,
@@ -519,14 +596,32 @@
       };
     };
 
-    const applySegRoster = (idx) => {
+    function showCourtSwitchPopup(segIdx, reasonText = 'Players Changed') {
+      const seg = RELAY_SEGMENTS[segIdx];
+      const r = segmentRosters[segIdx];
+      const { nameA, nameB } = getTeamNames();
+      document.getElementById('court-switch-title').textContent = `${reasonText} · ${seg.rangeLabel} ${seg.label}`;
+      document.getElementById('court-switch-lineup').innerHTML =
+        `<div><b>${nameA}:</b> ${r.A_left} / ${r.A_right}</div>` +
+        `<div><b>${nameB}:</b> ${r.B_right} / ${r.B_left}</div>`;
+      document.getElementById('court-switch-modal').classList.add('open');
+    }
+
+    function hideCourtSwitchPopup() {
+      document.getElementById('court-switch-modal').classList.remove('open');
+    }
+
+    function applySegRoster(idx, notifySwitch = false, reasonText = 'Players Changed') {
       const r = segmentRosters[idx];
       if (!r) return;
       state.positions = { A_left: r.A_left, A_right: r.A_right, B_right: r.B_right, B_left: r.B_left };
       activeSegmentIndex = idx;
       document.getElementById('select-active-match').value = String(idx);
       refreshServerState(state.servingTeam);
-    };
+      if (notifySwitch && !isApplyingRemoteState) {
+        showCourtSwitchPopup(idx, reasonText);
+      }
+    }
 
     const getServerForTeam = (team) => {
       const odd = (team === 'A' ? state.scoreA : state.scoreB) % 2 === 1;
@@ -576,6 +671,7 @@
       saveSegRoster(activeSegmentIndex);
       const map = { [prev.A_left]: state.positions.A_left, [prev.A_right]: state.positions.A_right, [prev.B_right]: state.positions.B_right, [prev.B_left]: state.positions.B_left };
       state.servingPlayer = Object.prototype.hasOwnProperty.call(map, state.servingPlayer) ? map[state.servingPlayer] : getServerForTeam(state.servingTeam);
+      showCourtSwitchPopup(activeSegmentIndex, 'Player Rotation (CCW 2)');
       render();
     }
 
@@ -637,17 +733,6 @@
       lEl.style.color = servA ? 'var(--team-a-score)' : 'var(--team-b-score)';
       rEl.style.color = servA ? 'var(--team-b-score)' : 'var(--team-a-score)';
 
-      const callout = document.querySelector('.pickleball-app-wrapper .score-callout');
-      document.getElementById('switch-indicator')?.remove();
-      if (state.endsSwitchedAt8 && !state.switchBadgeDismissed) {
-        const badge = document.createElement('div');
-        badge.id = 'switch-indicator';
-        badge.style.cssText = 'font-size:0.8rem;font-weight:bold;background:#1565c0;color:#fff;padding:4px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;';
-        badge.textContent = `Ends Switched (at ${state.switchTarget})`;
-        badge.addEventListener('click', () => { state.switchBadgeDismissed = true; badge.remove(); broadcastSnapshot(); });
-        callout.appendChild(badge);
-      }
-
       const fLog = document.getElementById('fault-log');
       fLog.innerHTML = faultHistory.slice(-10).map((e) => `<div class="fault-log-entry">${e}</div>`).join('');
       fLog.scrollTop = fLog.scrollHeight;
@@ -690,11 +775,8 @@
       const nextSeg = getMilestoneSeg(state.scoreA, state.scoreB);
       if (nextSeg !== activeSegmentIndex) {
         saveSegRoster(activeSegmentIndex);
-        applySegRoster(nextSeg);
-      }
-      if (!state.endsSwitchedAt8 && (state.scoreA >= state.switchTarget || state.scoreB >= state.switchTarget)) {
-        state.endsSwitchedAt8 = true;
-        state.switchBadgeDismissed = false;
+        const milestonePts = RELAY_SEGMENTS[nextSeg].min;
+        applySegRoster(nextSeg, true, `Milestone ${milestonePts} Pts Reached`);
       }
       if (state.scoreA >= state.gameTarget || state.scoreB >= state.gameTarget) {
         state.gameOver = true;
@@ -754,8 +836,9 @@
     function resetGame() {
       history = [];
       faultHistory = [];
-      Object.assign(state, { scoreA: 0, scoreB: 0, gameTarget: 100, switchTarget: 8, gameOver: false, servingTeam: 'A', serverNumber: 1, isOpeningServe: true, servingSide: 'even', endsSwitchedAt8: false, manualSwap: false, switchBadgeDismissed: false });
-      applySegRoster(0);
+      hideCourtSwitchPopup();
+      Object.assign(state, { scoreA: 0, scoreB: 0, gameTarget: 100, gameOver: false, servingTeam: 'A', serverNumber: 1, isOpeningServe: true, servingSide: 'even', manualSwap: false });
+      applySegRoster(0, false);
       render();
     }
 
@@ -770,8 +853,9 @@
     }
 
     function getDisplayShareUrl() {
-      const base = PUBLIC_APP_URL ? PUBLIC_APP_URL.replace(/\/+$/, '') + '/' : window.location.href.split('?')[0];
-      return `${base}?view=display&room=${encodeURIComponent(roomId)}`;
+      const base = PUBLIC_APP_URL || window.location.href.split('?')[0];
+      const sep = base.includes('?') ? '&' : '?';
+      return `${base}${sep}view=display&room=${encodeURIComponent(roomId)}`;
     }
 
     function renderRoomQRCode() {
@@ -856,7 +940,7 @@
         return;
       }
       const client = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-      realtimeChannel = client.channel(`pickleball-room-${roomId}`, { config: { broadcast: { self: false, ack: true } } });
+      realtimeChannel = client.channel(`pickleball-relay-${roomId}`, { config: { broadcast: { self: false, ack: true } } });
       realtimeChannel
         .on('broadcast', { event: 'score_update' }, ({ payload }) => { if (viewMode === 'display') applyRemoteSnapshot(payload); })
         .on('broadcast', { event: 'request_state' }, ({ payload }) => { if (viewMode === 'control' && payload && String(payload.roomId || '').toUpperCase() === roomId) broadcastSnapshot(); })
@@ -870,6 +954,10 @@
     }
 
     document.getElementById('room-code-text').textContent = roomId;
+    document.getElementById('btn-dismiss-court-switch').addEventListener('click', hideCourtSwitchPopup);
+    document.getElementById('court-switch-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'court-switch-modal') hideCourtSwitchPopup();
+    });
     document.getElementById('btn-toggle-qr').addEventListener('click', () => {
       const pop = document.getElementById('qr-popover');
       const open = pop.style.display === 'none';
@@ -900,7 +988,7 @@
     document.getElementById('select-active-match').addEventListener('change', (e) => {
       saveSegRoster(activeSegmentIndex);
       history = []; faultHistory = []; state.gameOver = false;
-      applySegRoster(parseInt(e.target.value, 10));
+      applySegRoster(parseInt(e.target.value, 10), true, 'Segment Changed');
       render();
     });
     document.getElementById('team-name-A').addEventListener('input', render);
@@ -924,7 +1012,7 @@
 
     applyViewMode(viewMode);
     initRealtimeSync();
-    applySegRoster(0);
+    applySegRoster(0, false);
     render();
   </script>
 </body>
